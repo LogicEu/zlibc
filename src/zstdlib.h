@@ -3,13 +3,8 @@
 
 #include <zstddef.h>
 
-#ifndef ZCC_EXIT_FAILURE
-    #define ZCC_EXIT_FAILURE 1
-#endif
-
-#ifndef ZCC_EXIT_SUCCESS
-    #define ZCC_EXIT_SUCCESS 0
-#endif
+#define Z_EXIT_FAILURE 1
+#define Z_EXIT_SUCCESS 0
 
 void zexit(int status);
 void* zmalloc(size_t size);
