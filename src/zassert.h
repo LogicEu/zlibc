@@ -17,7 +17,7 @@ do {                            \
             __FUNCTION__,       \
             __LINE__            \
         );                      \
-        zexit(ZCC_EXIT_FAILURE);\
+        zexit(Z_EXIT_FAILURE);  \
     }                           \
 } while (0)
 #else
