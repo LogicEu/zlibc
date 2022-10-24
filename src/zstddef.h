@@ -16,7 +16,9 @@
 #ifndef __ZNULL
     #define __ZNULL
     #define ZNULL ((void*)0)
-    #define NULL ZNULL
+    #ifndef NULL
+        #define NULL ZNULL
+    #endif
 #endif
 
 #endif
