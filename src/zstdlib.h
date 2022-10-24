@@ -14,5 +14,5 @@ int zatoi(const char* str);
 int zitoa(int num, char* str, const int base);
 long zstrtol(const char* str, char** endptr, int base);
 
-#endif
+#endif /* Z_STDLIB_H */
 

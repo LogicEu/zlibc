@@ -25,4 +25,4 @@ size_t zwrite(void* ptr, size_t size, size_t count, ZFILE* file);
 int zfseek(ZFILE* file, long offset, int whence);
 long zftell(ZFILE* file);
 
-#endif
+#endif /* Z_STDIO_H */

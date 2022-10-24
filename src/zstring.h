@@ -14,4 +14,4 @@ char* zstrchr(const char* str, const int c);
 char* zstrstr(const char* big, const char* small);
 char* zstrrev(char* str);
 
-#endif
+#endif /* Z_STRING_H */

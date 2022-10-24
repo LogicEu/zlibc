@@ -12,4 +12,4 @@
 
 int zsyscall(int op, ...);
 
-#endif
+#endif /* Z_SYS_H */

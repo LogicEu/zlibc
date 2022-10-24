@@ -34,4 +34,4 @@ int toascii(int c);
 int tolower(int c);
 int toupper(int c);
 
-#endif
+#endif /* Z_CTYPE_H*/
