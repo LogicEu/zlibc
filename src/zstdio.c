@@ -38,11 +38,6 @@ int zprintf(const char* fmt, ...)
     return ret;
 }
 
-int zsprintf(char* str, const char* fmt, ...)
-{
-    
-}
-
 ZFILE* zfopen(const char* path, const char* mode)
 {
     return fopen(path, mode);

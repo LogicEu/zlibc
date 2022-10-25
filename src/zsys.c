@@ -1,6 +1,6 @@
 #include <zsys.h>
 
-int zsyscall(int op, ...) __attribute__((optnone)) 
+int zsyscall(int op, ...)
 {
     __asm__(
         "\tmovq %rdi, %rax\n"

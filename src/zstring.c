@@ -19,7 +19,7 @@ int zmemcmp(const void* p1, const void* p2, size_t n)
     return n ? (*a - *b) : 0;
 }
 
-void* zmemset (void* dst, int val, size_t n) __attribute__((optnone)) 
+void* zmemset (void* dst, int val, size_t n)
 {
     unsigned char* a = dst;
     while (n--) {
