@@ -11,8 +11,10 @@ void* zmalloc(size_t size);
 void zfree(void* ptr);
 long zatol(const char* str);
 int zatoi(const char* str);
+double zatof(const char* str);
 int zitoa(int num, char* str, const int base);
 long zstrtol(const char* str, char** endptr, int base);
+double zstrtod(const char* str, char** endptr);
 
 #endif /* Z_STDLIB_H */
 

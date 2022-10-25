@@ -22,24 +22,87 @@ void zexit(int status)
 
 int zatoi(const char* str)
 {
-    int i, j = 1, n = 0, neg = (str[0] == '-');
-    for (i = neg; str[i] >= '0' && str[i] <= '9'; ++i);
-    for (--i; i >= neg; --i) {
-        n += (str[i] - '0') * j;
-        j *= 10;
+    int n = 0, sign = 1;
+
+    while (*str == ' ') { 
+        ++str; 
     }
-    return neg ? -n : n;
+
+    if (*str == '+') {
+        ++str;
+    }
+    else if (*str == '-') {
+        sign = -1;
+        ++str;
+    }
+
+    while (*str >= '0' && *str <= '9') {
+        n = n * 10 + *str++ - '0'; 
+    }
+    
+    return n * sign;
 }
 
 long zatol(const char* str)
 {
-    long i, j = 1, n = 0, neg = (str[0] == '-');
-    for (i = 0; str[i] >= '0' && str[i] <= '9'; ++i);
-    for (--i; i >= neg; --i) {
-        n += (str[i] - '0') * j;
-        j *= 10;
+    long n = 0, sign = 1;
+
+    while (*str == ' ') { 
+        ++str; 
     }
-    return neg ? -n : n;
+
+    if (*str == '+') {
+        ++str;
+    }
+    else if (*str == '-') {
+        sign = -1;
+        ++str;
+    }
+
+    while (*str >= '0' && *str <= '9') {
+        n = n * 10 + *str++ - '0'; 
+    }
+    
+    return n * sign;
+}
+
+double zatof(const char* str) 
+{
+    int dot = 0;
+    double n = 0.0, sign = 1.0, f;
+
+    while (*str == ' ') { 
+        ++str; 
+    }
+
+    if (*str == '+') {
+        ++str;
+    }
+    else if (*str == '-') {
+        sign = -1.0;
+        ++str;
+    }
+    else if (*str == '.') {
+        ++dot;
+        ++str;
+    } 
+
+    while (*str >= '0' && *str <= '9') {
+        f = (double)(*str++ - '0');
+        if (!dot) {
+            n = n * 10.0 + f;
+            if (*str == '.') {
+                ++dot;
+                ++str;
+            }
+        }
+        else {
+            dot *= 10;
+            n += f / (double)dot;
+        }
+    }
+
+    return n * sign;
 }
 
 int zitoa(int num, char* str, const int base)
@@ -73,6 +136,10 @@ int zitoa(int num, char* str, const int base)
 
 long zstrtol(const char* str, char** endptr, int base)
 {
+    while (*str == ' ') { 
+        ++str; 
+    }
+
     long sign = 1;
     if (*str == '+') {
         ++str;
@@ -121,4 +188,47 @@ long zstrtol(const char* str, char** endptr, int base)
     }
 
     return sign * n;
+}
+
+double zstrtod(const char* str, char** endptr) 
+{
+    int dot = 0;
+    double n = 0.0, sign = 1.0, f;
+
+    while (*str == ' ') { 
+        ++str; 
+    }
+
+    if (*str == '+') {
+        ++str;
+    }
+    else if (*str == '-') {
+        sign = -1.0;
+        ++str;
+    }
+    else if (*str == '.') {
+        ++dot;
+        ++str;
+    } 
+
+    while (*str >= '0' && *str <= '9') {
+        f = (double)(*str++ - '0');
+        if (!dot) {
+            n = n * 10.0 + f;
+            if (*str == '.') {
+                ++dot;
+                ++str;
+            }
+        }
+        else {
+            dot *= 10;
+            n += f / (double)dot;
+        }
+    }
+
+    if (endptr) {
+        *endptr = (char*)(size_t)str;
+    }
+
+    return n * sign;
 }

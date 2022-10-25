@@ -18,6 +18,7 @@ int zputs(const char* str);
 int zvfprintf(ZFILE* file, const char* fmt, va_list ap);
 int zfprintf(ZFILE* file, const char* fmt, ...);
 int zprintf(const char* fmt, ...);
+int zsprintf(char* str, const char* fmt, ...);
 ZFILE* zfopen(const char* path, const char* mode);
 int zfclose(ZFILE* file);
 size_t zfread(void* ptr, size_t size, size_t count, ZFILE* file);
