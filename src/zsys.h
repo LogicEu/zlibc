@@ -10,6 +10,7 @@
 #define SYS_creat 0x2000008
 #define SYS_lseek 0x2000019
 
-int __attribute__((optnone)) zsyscall(int op, ...);
+__attribute__((optimize("O0"))) 
+int zsyscall(int op, ...);
 
 #endif /* Z_SYS_H */
