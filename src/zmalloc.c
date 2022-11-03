@@ -5,7 +5,6 @@
 #include <zstdlib.h>
 
 extern int zprintf(const char* fmt, ...);
-#define ZBUG zprintf("File %s, Function %s, Line %ld\n", __FILE__, __func__, __LINE__)
 
 #ifndef PAGESIZE
 #define PAGESIZE 4096
@@ -66,18 +65,6 @@ static void* memfree(void)
     
     zprintf("successfully cleaned all memmory.\n");
     return NULL;
-}
-
-static void memassert(void)
-{
-    if (head) {
-        memnode_t* n = head;
-        while (n->next) {
-            zprintf("%p -> %p -> %zu\n", n, n->next, n->checksum);
-            zassert(n->next->prev == n);
-            n = n->next;
-        }
-    }
 }
 
 static void memnode_add(memnode_t* node)
