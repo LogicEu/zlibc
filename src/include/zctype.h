@@ -15,8 +15,8 @@
 #define _ispunct(c) (_isgraph(c) && !_isalnum(c))
 #define _isxdigit(c) (_isdigit(c) || _isbetween(c, 'A', 'F') || _isbetween(c, 'a', 'f'))
 #define _toascii(c) ((c) & 0x7f)
-#define _tolower(c) ((c) + 32)
-#define _toupper(c) ((c) - 32)
+#define _tolower(c) ((c) + 32 * _isupper(c))
+#define _toupper(c) ((c) - 32 * _islower(c))
 
 int isalnum(int c);
 int isalpha(int c);

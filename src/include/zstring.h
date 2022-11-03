@@ -22,5 +22,6 @@ size_t zstrlen(const char* str);
 char* zstrchr(const char* str, const int c);
 char* zstrstr(const char* big, const char* small);
 char* zstrrev(char* str);
+char* zstrnrev(char* str, size_t len);
 
 #endif /* Z_STRING_H */

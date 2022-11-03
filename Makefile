@@ -1,9 +1,9 @@
 # zlibc makefile
 
-STD=-std=c89
+STD=-std=c89 -nostdlib -fno-stack-protector
 WFLAGS=-Wall -Wextra
 OPT=-O2
-IDIR=-I. -Isrc
+IDIR=-Isrc/include
 CC=gcc
 NAME=libzlibc
 SRC=src/*.c
@@ -11,7 +11,7 @@ SRC=src/*.c
 OS=$(shell uname -s)
 
 ifeq ($(OS),Darwin)
-	OSFLAGS=-dynamiclib
+	OSFLAGS=-dynamiclib -lSystem
 	LIB=$(NAME).dylib
 else
 	OSFLAGS=-shared -fPIC

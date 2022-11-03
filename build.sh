@@ -9,8 +9,7 @@ flags=(
     -Wall
     -Wextra
     -O2
-    -I.
-    -Isrc
+    -Isrc/include
 )
 
 comp() {
@@ -19,7 +18,7 @@ comp() {
 
 shared() {
     if echo "$OSTYPE" | grep -q "darwin"; then
-        comp $cc ${flags[*]} -dynamiclib $src -o $name.dylib
+        comp $cc ${flags[*]} -dynamiclib -lSystem $src -o $name.dylib
     elif echo "$OSTYPE" | grep -q "linux"; then
         comp $cc -shared ${flags[*]} -fPIC $src -o $name.so 
     else

@@ -105,3 +105,14 @@ char* zstrrev(char* str)
     }
     return str;
 }
+
+char* zstrnrev(char* str, size_t len)
+{
+    size_t i = 0;
+    while (i < len) {
+        char c = str[i];
+        str[i++] = str[len - 1];
+        str[--len] = c;
+    }
+    return str;
+}

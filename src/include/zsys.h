@@ -21,6 +21,10 @@
     #define SYS_lseek 0x0000019
 #endif
 
+#define SYS_STDIN 0
+#define SYS_STDOUT 1
+#define SYS_STDERR 2
+
 #if defined (__clang__)
     #define optnone __attribute__((optnone))
 #elif defined (__GNUC__)
