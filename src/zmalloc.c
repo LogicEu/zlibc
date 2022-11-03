@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <sys/mman.h>
 #include <zstring.h>
 #include <zassert.h>
@@ -9,8 +10,8 @@ extern int zprintf(const char* fmt, ...);
 #define PAGESIZE 4096
 #endif
 
-#define MEMCHECK_OWND 0x777777777777UL
-#define MEMCHECK_FREE 0xfedcba012345UL
+#define MEMCHECK_OWND 0x77777777
+#define MEMCHECK_FREE 0xfedcba01
 
 typedef struct memnode_t {
     size_t checksum;
@@ -37,12 +38,12 @@ static void* memalloc(size_t size)
 {
     void* mem;
     if (!membase) {
-        mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
+        mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
         if (mem != MAP_FAILED) {
             membase = mem;
         }
     }
-    else mem = mmap(membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE | MAP_FIXED, 0, 0);
+    else mem = mmap(membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, 0, 0);
     
     if (mem && mem != MAP_FAILED) {
         membytes += size;

@@ -4,9 +4,11 @@
 #include <zstdlib.h>
 #include <zstdio.h>
 
+#ifndef NDEBUG
+
+__attribute__((unused))
 static const char* zassertmsg = "Assertion failed: %s, file %s, function %s, Line %zu.\n";
 
-#ifndef NDEBUG
 #define zassert(expr)           \
 do {                            \
     if (!(expr)) {              \
