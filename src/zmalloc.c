@@ -5,6 +5,7 @@
 #include <zstdlib.h>
 
 extern int zprintf(const char* fmt, ...);
+#define ZBUG zprintf("File %s, Function %s, Line %ld\n", __FILE__, __func__, __LINE__)
 
 #ifndef PAGESIZE
 #define PAGESIZE 4096
@@ -67,6 +68,18 @@ static void* memfree(void)
     return NULL;
 }
 
+static void memassert(void)
+{
+    if (head) {
+        memnode_t* n = head;
+        while (n->next) {
+            zprintf("%p -> %p -> %zu\n", n, n->next, n->checksum);
+            zassert(n->next->prev == n);
+            n = n->next;
+        }
+    }
+}
+
 static void memnode_add(memnode_t* node)
 {
     node->checksum = MEMCHECK_FREE;
@@ -75,18 +88,18 @@ static void memnode_add(memnode_t* node)
 
     if (!head) {
         head = node;
-    }
-
-    else if ((size_t)head > (size_t)node) {
+    } else if ((size_t)head > (size_t)node) {
         node->next = head;
         head->prev = node;
         head = node;
-    }
-
-    else {
+    } else {
         memnode_t* curr = head;
         while (curr->next && (size_t)curr->next < (size_t)node) {
             curr = curr->next;
+        }
+        
+        if (curr->next) {
+            curr->next->prev = node;
         }
         node->next = curr->next;
         node->prev = curr;
@@ -106,10 +119,12 @@ static void memnode_remove(memnode_t* node)
         node->prev->next = node->next;
     }
     else if (head->next) {
-        head->next->prev = NULL;
         head = head->next;
     }
     else head = NULL;
+
+    node->next = NULL;
+    node->prev = NULL;
 }
 
 static int memnode_checksum(memnode_t* node, size_t flag)
@@ -131,22 +146,18 @@ static memnode_t* memnode_merge(void)
 
             curr->size += curr->next->size + sizeof(memnode_t);
             curr->next = curr->next->next;
-            
-            if (!curr->next) {
-                break;
+
+            if (curr->next) {
+                curr->next->prev = curr;
             }
-            
-            curr->next->prev = curr;
-            continue;
         }
-        curr = curr->next;
+        else curr = curr->next;
     }
     return curr;
 }
 
 static void memnode_trim(memnode_t* curr)
 {
-    /* trim */
     if (curr->size >= PAGESIZE && (size_t)curr + curr->size + sizeof(memnode_t) == (size_t)membase + membytes) {
         size_t free_size;
         if ((size_t)curr - (size_t)membase) {
@@ -185,9 +196,7 @@ static void memnode_split(memnode_t* node, size_t size)
 {
     memnode_t* n = (memnode_t*)((size_t)node + size + sizeof(memnode_t));
     n->size = node->size - (size + sizeof(memnode_t));
-    n->checksum = MEMCHECK_FREE;
     node->size = size;
-    node->checksum = MEMCHECK_OWND;
     memnode_add(n);
 }
 
