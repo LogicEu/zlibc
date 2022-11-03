@@ -1,14 +1,22 @@
 #include <zsys.h>
 #include <zstddef.h>
+#include <zstdarg.h>
 #include <zstdlib.h>
 #include <zstring.h>
 #include <zstdio.h>
 
 static char stdio_buffer[BUFSIZ];
 
-static int zsysprint(const char* str, int len)
+static int zsysprint(const char* str, int fd, int len)
 {
-    return zsyscall(SYS_write, SYS_STDOUT, str, len);
+    return zsyscall(SYS_write, fd, str, len);
+}
+
+static size_t zioflush(int fd, size_t len)
+{
+    stdio_buffer[len] = 0;
+    zsysprint(stdio_buffer, fd, len);
+    return len;
 }
 
 #define lli(buf, i, base, l, ap, type) do {                     \
@@ -40,11 +48,11 @@ static int zsysprint(const char* str, int len)
     }                                                           \
 } while (0)
 
-static char* zstrfmt(const char* fmt, const char** end, int* len, va_list ap)
+static char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
 {
     static char buf[BUFSIZ];
     
-    int l, i = 0;
+    size_t l, i = 0;
     for (l = 0; *fmt == 'l' && l < 2; ++l) {
         ++fmt;
     }
@@ -61,10 +69,9 @@ static char* zstrfmt(const char* fmt, const char** end, int* len, va_list ap)
         }
         case 's': {
             char* s = va_arg(ap, char*);
-            int len = zstrlen(s);
-            zmemcpy(buf + i, s, len);
-            i += len;
-            break;
+            *len = i + zstrlen(s);
+            *end = fmt;
+            return s;
         }
         case 'd': {
             lli(buf, i, 10, l, ap, int);
@@ -74,6 +81,7 @@ static char* zstrfmt(const char* fmt, const char** end, int* len, va_list ap)
             llu(buf, i, 10, l, ap, unsigned int);
             break;
         }
+        case 'X':
         case 'x': {
             buf[i++] = '0';
             buf[i++] = 'x';
@@ -114,7 +122,7 @@ static char* zstrfmt(const char* fmt, const char** end, int* len, va_list ap)
 int zvsprintf(char* buf, const char* fmt, va_list ap)
 {
     char* arg;
-    int i = 0, len;
+    size_t i = 0, len;
     while (*fmt) {
         if (*fmt == '%') {
             arg = zstrfmt(++fmt, &fmt, &len, ap);
@@ -129,6 +137,34 @@ int zvsprintf(char* buf, const char* fmt, va_list ap)
     return i;
 }
 
+int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
+{
+    char* arg;
+    size_t i = 0, len;
+    while (*fmt && i + 1 >= BUFSIZ) {
+        if (*fmt == '%') {
+            arg = zstrfmt(++fmt, &fmt, &len, ap);
+            len = len + i > size ? size - len - 1 : len;
+            zmemcpy(buf + i, arg, len);
+            i += len;
+        }
+        else buf[i++] = *fmt;
+        ++fmt;
+    }
+    
+    buf[i] = 0;
+    return i;
+}
+
+int zsnprintf(char* buf, size_t size, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    int ret = zvsnprintf(buf, size, fmt, ap);
+    va_end(ap);
+    return ret;
+}
+
 int zsprintf(char* buf, const char* fmt, ...)
 {
     va_list ap;
@@ -138,18 +174,57 @@ int zsprintf(char* buf, const char* fmt, ...)
     return ret;
 }
 
+int zvdprintf(int fd, const char* fmt, va_list ap)
+{
+    char* arg;
+    size_t i = 0, len, ret = 0;
+    while (*fmt) {
+        if (*fmt == '%') {
+            arg = zstrfmt(++fmt, &fmt, &len, ap);
+            if (i + len >= BUFSIZ) {
+                ret += zioflush(fd, i);
+                i = 0;
+                if (*fmt == 's') {
+                    zsysprint(arg, fd, len);
+                    ++fmt;
+                    continue;
+                }
+            }
+            zmemcpy(stdio_buffer + i, arg, len);
+            i += len;
+        }
+        else stdio_buffer[i++] = *fmt;
+        ++fmt;
+
+        if (i + 1 >= BUFSIZ) {
+            ret += zioflush(fd, i);
+            i = 0;
+        }
+    }
+    
+    ret += zioflush(fd, i);
+    return ret;
+}
+
+int zdprintf(int fd, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    int ret = zvdprintf(fd, fmt, ap);
+    va_end(ap);
+    return ret;
+}
+
 int zvprintf(const char* fmt, va_list ap)
 {
-    int ret = zvsprintf(stdio_buffer, fmt, ap);
-    zsysprint(stdio_buffer, ret);
-    return ret;
+    return zvdprintf(SYS_STDOUT, fmt, ap);
 }
 
 int zprintf(const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvprintf(fmt, ap);
+    int ret = zvdprintf(SYS_STDOUT, fmt, ap);
     va_end(ap);
     return ret;
 }

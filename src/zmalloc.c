@@ -125,29 +125,29 @@ static int memnode_checksum(memnode_t* node, size_t flag)
 
 static memnode_t* memnode_merge(void)
 {
-	memnode_t *curr = head;
-	while (curr->next) {
-		if ((size_t)curr + curr->size + sizeof(memnode_t) == (size_t)curr->next) {
+    memnode_t *curr = head;
+    while (curr->next) {
+        if ((size_t)curr + curr->size + sizeof(memnode_t) == (size_t)curr->next) {
 
             curr->size += curr->next->size + sizeof(memnode_t);
-			curr->next = curr->next->next;
-			
+            curr->next = curr->next->next;
+            
             if (!curr->next) {
                 break;
             }
-			
+            
             curr->next->prev = curr;
             continue;
-		}
-		curr = curr->next;
-	}
+        }
+        curr = curr->next;
+    }
     return curr;
 }
 
 static void memnode_trim(memnode_t* curr)
 {
     /* trim */
-	if (curr->size >= PAGESIZE && (size_t)curr + curr->size + sizeof(memnode_t) == (size_t)membase + membytes) {
+    if (curr->size >= PAGESIZE && (size_t)curr + curr->size + sizeof(memnode_t) == (size_t)membase + membytes) {
         size_t free_size;
         if ((size_t)curr - (size_t)membase) {
             free_size = PAGESIZE;
@@ -170,11 +170,11 @@ static void memnode_trim(memnode_t* curr)
         }
 
         membytes -= free_size;
-		if (munmap(membase + membytes, free_size)) {
-			zprintf("mmap error freeing %zub of memory.\n", free_size);
+        if (munmap(membase + membytes, free_size)) {
+            zprintf("mmap error freeing %zub of memory.\n", free_size);
             return;
-		}
-	}
+        }
+    }
 
     if (curr->size + sizeof(memnode_t) == membytes) {
         memfree();
@@ -184,16 +184,17 @@ static void memnode_trim(memnode_t* curr)
 static void memnode_split(memnode_t* node, size_t size)
 {
     memnode_t* n = (memnode_t*)((size_t)node + size + sizeof(memnode_t));
-	n->size = node->size - (size + sizeof(memnode_t));
-	node->size = size;
+    n->size = node->size - (size + sizeof(memnode_t));
+    n->checksum = MEMCHECK_FREE;
+    node->size = size;
     node->checksum = MEMCHECK_OWND;
-	memnode_add(n);
+    memnode_add(n);
 }
 
 void* zmalloc(size_t size)
 {
-	void *mem;
-	memnode_t *ptr;
+    void *mem;
+    memnode_t *ptr;
 
     if (!size) {
         return NULL;
@@ -202,20 +203,20 @@ void* zmalloc(size_t size)
     size_t pad = mempad(size + sizeof(memnode_t));
     size = pad - sizeof(memnode_t);
 
-	size_t alloc_size = PAGESIZE;
+    size_t alloc_size = PAGESIZE;
     while (pad > alloc_size) {
         alloc_size *= 2;
     }
 
-	ptr = head;
-	while (ptr) {
+    ptr = head;
+    while (ptr) {
         if (ptr->size >= size) {
             if (memnode_checksum(ptr, MEMCHECK_FREE)) {
                 zprintf("heap memory corruption detected at %p\n", ptr);
                 zabort();
             }
 
-            if (ptr->size != size) {
+            if (ptr->size > size) {
                 memnode_split(ptr, size);
             }
 
@@ -224,26 +225,26 @@ void* zmalloc(size_t size)
             return mem;
         }
 
-		ptr = ptr->next;
-	}
+        ptr = ptr->next;
+    }
 
     ptr = memalloc(alloc_size);
 
-	if (!ptr || ptr == MAP_FAILED) {
-	    zprintf("malloc failed to allocate memory (%zu).\n", alloc_size);
-		return NULL;
-	}
+    if (!ptr || ptr == MAP_FAILED) {
+        zprintf("malloc failed to allocate memory (%zu).\n", alloc_size);
+        return NULL;
+    }
 
     ptr->checksum = MEMCHECK_OWND;
-	ptr->next = NULL;
-	ptr->prev = NULL;
-	ptr->size = alloc_size - sizeof(memnode_t);
-	
-    if (alloc_size > size) {
-		memnode_split(ptr, size);
-	}
+    ptr->next = NULL;
+    ptr->prev = NULL;
+    ptr->size = alloc_size - sizeof(memnode_t);
+    
+    if (ptr->size > size) {
+        memnode_split(ptr, size);
+    }
 
-	return MEMBLOCK(ptr);
+    return MEMBLOCK(ptr);
 }
 
 void zfree(void *ptr)
@@ -258,8 +259,8 @@ void zfree(void *ptr)
         zabort();
     }
 
-	memnode_add(node);
-	node = memnode_merge();
+    memnode_add(node);
+    node = memnode_merge();
     memnode_trim(node);
 }
 
@@ -276,8 +277,8 @@ void* zrealloc(void* ptr, size_t size)
     }
 
     size_t node_size = node->size;
-	memnode_add(node);
-	node = memnode_merge();
+    memnode_add(node);
+    node = memnode_merge();
 
     void* mem = zmalloc(size);
     if (mem) {
