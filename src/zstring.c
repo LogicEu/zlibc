@@ -4,6 +4,22 @@ void* zmemcpy(void* dst, const void* src, size_t n)
 {
     unsigned char* a = dst;
     const unsigned char* b = src;
+    if (a < b) {
+        while (n--) {
+            *a++ = *b++;
+        }
+    } else {
+        while (n--) {
+            a[n] = b[n];
+        }
+    }
+    return dst;
+}
+
+void* zmemmove(void* dst, const void* src, size_t n)
+{
+    unsigned char* a = dst;
+    const unsigned char* b = src;
     while (n--) {
         *a++ = *b++;
     }
