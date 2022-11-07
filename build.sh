@@ -6,6 +6,8 @@ name=libzlibc
 
 flags=(
     -std=c89
+    -nostdlib
+    -fno-stack-protector
     -Wall
     -Wextra
     -O2
