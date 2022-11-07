@@ -1,28 +1,65 @@
 #include <zstring.h>
+#define MEMOPT 1
 
 void* zmemcpy(void* dst, const void* src, size_t n)
 {
-    unsigned char* a = dst;
-    const unsigned char* b = src;
-    while (n--) {
-        *a++ = *b++;
+#if MEMOPT
+    if ((size_t)dst % sizeof(void*) == 0 && 
+        (size_t)src % sizeof(void*) == 0 && 
+        n % sizeof(void*) == 0) {
+        long* a = dst;
+        const long* b = src;
+        n /= sizeof(void*);
+        while (n--) {
+            *a++ = *b++;
+        }
+    } else {
+#endif
+        unsigned char* a = dst;
+        const unsigned char* b = src;
+        while (n--) {
+            *a++ = *b++;
+        }
+#if MEMOPT
     }
+#endif
     return dst;
 }
 
 void* zmemmove(void* dst, const void* src, size_t n)
 {
-    unsigned char* a = dst;
-    const unsigned char* b = src;
-    if (a < b) {
-        while (n--) {
-            *a++ = *b++;
+#if MEMOPT
+    if ((size_t)dst % sizeof(void*) == 0 && 
+        (size_t)src % sizeof(void*) == 0 && 
+        n % sizeof(void*) == 0) {
+        long* a = dst;
+        const long* b = src;
+        n /= sizeof(void*);
+        if (a < b) {
+            while (n--) {
+                *a++ = *b++;
+            }
+        } else {
+            while (n--) {
+                a[n] = b[n];
+            }
         }
     } else {
-        while (n--) {
-            a[n] = b[n];
+#endif
+        unsigned char* a = dst;
+        const unsigned char* b = src;
+        if (a < b) {
+            while (n--) {
+                *a++ = *b++;
+            }
+        } else {
+            while (n--) {
+                a[n] = b[n];
+            }
         }
+#if MEMOPT
     }
+#endif
     return dst;
 }
 

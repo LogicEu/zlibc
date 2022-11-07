@@ -29,6 +29,7 @@ int zztoa(size_t num, char* buf, const int base);
 int zftoa(double num, char* buf, int presicion);
 
 long zstrtol(const char* str, char** endptr, int base);
+unsigned long zstrtoul(const char* str, char** endptr, int base);
 double zstrtod(const char* str, char** endptr);
 
 #endif /* Z_STDLIB_H */

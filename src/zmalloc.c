@@ -277,7 +277,7 @@ void* zrealloc(void* ptr, size_t size)
     node = memnode_merge();
 
     void* mem = zmalloc(size);
-    if (mem) {
+    if (mem && mem != ptr) {
         size_t len = size < node_size ? size : node_size;
         zmemcpy(mem, ptr, len);
     }
@@ -295,3 +295,36 @@ void* zcalloc(size_t count, size_t size)
     }
     return mem;
 }
+
+#ifndef NDEBUG
+void zmalloc_inspect(void)
+{
+    zprintf("Address: %p\nSize: %zuKb\n", membase, membytes >> 10);
+
+    if (!membase) {
+        return;
+    }
+
+    size_t freelen = 0, alloclen = 0;
+    memnode_t* curr = membase;
+    const size_t end = (size_t)membase + membytes;
+    while ((size_t)curr < end) {
+        switch (curr->checksum) {
+            case MEMCHECK_FREE:
+                freelen += curr->size;
+                zprintf("Free: %p - %zu\n", curr, curr->size);
+                break;
+            case MEMCHECK_OWND:
+                alloclen += curr->size;
+                zprintf("Ownd: %p - %zu\n", curr, curr->size);
+                break;
+            default:
+                zprintf("Memmory heap corruption detected at %p\n", curr);
+                return;
+        }
+        curr = (memnode_t*)((size_t)curr + curr->size + sizeof(memnode_t));
+    }
+
+    zprintf("Freed Space: %zub\nUsed Space: %zub\n", freelen, alloclen);
+}
+#endif

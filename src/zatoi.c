@@ -5,7 +5,7 @@ int zatoi(const char* str)
 {
     int n = 0, sign = 1;
 
-    while (*str == ' ') { 
+    while (_isspace(*str)) { 
         ++str; 
     }
 
@@ -28,7 +28,7 @@ long zatol(const char* str)
 {
     long n = 0, sign = 1;
 
-    while (*str == ' ') { 
+    while (_isspace(*str)) { 
         ++str; 
     }
 
@@ -52,7 +52,7 @@ double zatof(const char* str)
     int dot = 0;
     double n = 0.0, sign = 1.0, f;
 
-    while (*str == ' ') { 
+    while (_isspace(*str)) { 
         ++str; 
     }
 

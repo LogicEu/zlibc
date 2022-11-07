@@ -3,7 +3,7 @@
 
 #define _isbetween(c, min, max) (((c) >= (min)) && ((c) <= (max)))
 #define _isascii(c) ((c) >= 0)
-#define _isspace(c) ((c) == ' ')
+#define _isspace(c) (((c) == ' ') || _isbetween(c, 9, 13))
 #define _isdigit(c) _isbetween(c, '0', '9')
 #define _isalpha(c) (_isbetween(c, 'A', 'Z') || _isbetween(c, 'a', 'z'))
 #define _isalnum(c) (_isdigit(c) || _isalpha(c))

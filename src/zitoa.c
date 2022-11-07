@@ -190,7 +190,7 @@ int zftoa(double f, char *buf, int precision)
 		buf[i++] = '-';
 	}
 
-    f += 0.5 / zpow(10, precision);
+    f += 0.5 / zipow(10, precision);
 	intPart = (long)f;
 	f -= (double)intPart;
 
