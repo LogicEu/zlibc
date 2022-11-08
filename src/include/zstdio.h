@@ -8,7 +8,7 @@
 int zsnprintf(char* buf, size_t size, const char* fmt, ...);
 int zsprintf(char* buf, const char* fmt, ...);
 int zdprintf(int fd, const char* fmt, ...);
-int zprintf(const char* str, ...);
+int zprintf(const char* fmt, ...);
 
 int zsscanf(const char* str, const char* fmt, ...);
 

@@ -19,7 +19,7 @@ do {                            \
             __FUNCTION__,       \
             __LINE__            \
         );                      \
-        zexit(Z_EXIT_FAILURE);  \
+        zabort();               \
     }                           \
 } while (0)
 #else

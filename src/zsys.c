@@ -2,7 +2,7 @@
 
 int zsyscall(int op, ...)
 {
-    __asm__(
+    __asm__ volatile (
 #ifdef __x86_64__
         "\tmovq %rdi, %rax\n"
         "\tmovq %rsi, %rdi\n"
@@ -12,6 +12,7 @@ int zsyscall(int op, ...)
         "\tmovq %r9, %r8\n"
         "\tmovq 8(%rsp), %r9\n"
         "\tsyscall\n"
+        "\tmovl %eax, -4(%rbp)\n"
 #elif __arm__
         "\tmov r7, r0\n"
         "\tmov r0, r1\n"

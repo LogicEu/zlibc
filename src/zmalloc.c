@@ -1,5 +1,6 @@
 #define _DEFAULT_SOURCE
 #include <sys/mman.h>
+#include <sys/syscall.h>
 #include <zstring.h>
 #include <zassert.h>
 #include <zstdlib.h>
@@ -10,8 +11,9 @@ extern int zprintf(const char* fmt, ...);
 #define PAGESIZE 4096
 #endif
 
-#define MEMCHECK_OWND 0x77777777
-#define MEMCHECK_FREE 0xfedcba01
+#define MEMHINT_FILE (void*)0x600020000000UL
+#define MEMCHECK_OWND 0x77777777UL
+#define MEMCHECK_FREE 0xfedcba01UL
 
 typedef struct memnode_t {
     size_t checksum;
@@ -55,7 +57,7 @@ static void* memalloc(size_t size)
 static void* memfree(void)
 {
     if (munmap(membase, membytes)) {
-        zprintf("mmap error freeing %zub of memory.\n", membytes);
+        zprintf("munmap error freeing %zub of memory.\n", membytes);
         return MAP_FAILED;
     }
     
@@ -169,7 +171,7 @@ static void memnode_trim(memnode_t* curr)
 
         membytes -= free_size;
         if (munmap(membase + membytes, free_size)) {
-            zprintf("mmap error freeing %zub of memory.\n", free_size);
+            zprintf("munmap error freeing %zub of memory.\n", free_size);
             return;
         }
     }
@@ -225,9 +227,8 @@ void* zmalloc(size_t size)
     }
 
     ptr = memalloc(alloc_size);
-
     if (!ptr || ptr == MAP_FAILED) {
-        zprintf("malloc failed to allocate memory (%zu).\n", alloc_size);
+        zprintf("malloc failed to allocate %zub memory.\n", alloc_size);
         return NULL;
     }
 
@@ -296,7 +297,38 @@ void* zcalloc(size_t count, size_t size)
     return mem;
 }
 
+void* zfmalloc(int fd, size_t size)
+{
+    if (!size) {
+        return NULL;
+    }
+
+    size_t alloc_size = PAGESIZE;
+    while (size > alloc_size) {
+        alloc_size *= 2;
+    }
+    
+    void* mem = mmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    if (!mem || mem == MAP_FAILED) {
+        zprintf("fmalloc failed to allocate %zub of memory.\n", alloc_size);
+        return NULL;
+    }
+
+    void* ret = zmalloc(size);
+    if (ret) {
+        zmemcpy(ret, mem, size);
+    }
+
+    if (munmap(mem, alloc_size)) {
+        zprintf("munmap error freeing %zub of memory.\n", alloc_size);
+        zabort();
+    }
+
+    return ret;
+}
+
 #ifndef NDEBUG
+
 void zmalloc_inspect(void)
 {
     zprintf("Address: %p\nSize: %zuKb\n", membase, membytes >> 10);
@@ -327,4 +359,5 @@ void zmalloc_inspect(void)
 
     zprintf("Freed Space: %zub\nUsed Space: %zub\n", freelen, alloclen);
 }
+
 #endif

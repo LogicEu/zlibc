@@ -1,24 +1,15 @@
 #ifndef Z_SYSTEM_H
 #define Z_SYSTEM_H
 
+#include <sys/fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+
 #ifdef __APPLE__
-    #define SYS_exit  0x2000001
-    #define SYS_fork  0x2000002
-    #define SYS_read  0x2000003
-    #define SYS_write 0x2000004
-    #define SYS_open  0x2000005
-    #define SYS_close 0x2000006
-    #define SYS_creat 0x2000008
-    #define SYS_lseek 0x2000019
+#define SYS_OS_OFFSET 0x2000000
 #else
-    #define SYS_exit  0x0000001
-    #define SYS_fork  0x0000002
-    #define SYS_read  0x0000003
-    #define SYS_write 0x0000004
-    #define SYS_open  0x0000005
-    #define SYS_close 0x0000006
-    #define SYS_creat 0x0000008
-    #define SYS_lseek 0x0000019
+#define SYS_OS_OFFSET 0x0000000
 #endif
 
 #define SYS_STDIN 0
