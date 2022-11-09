@@ -1,6 +1,5 @@
 #define _DEFAULT_SOURCE
-#include <sys/mman.h>
-#include <sys/syscall.h>
+#include <zsys.h>
 #include <zstring.h>
 #include <zassert.h>
 #include <zstdlib.h>
@@ -40,12 +39,12 @@ static void* memalloc(size_t size)
 {
     void* mem;
     if (!membase) {
-        mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+        mem = zmmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
         if (mem != MAP_FAILED) {
             membase = mem;
         }
     }
-    else mem = mmap(membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, 0, 0);
+    else mem = zmmap(membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, 0, 0);
     
     if (mem && mem != MAP_FAILED) {
         membytes += size;
@@ -56,7 +55,7 @@ static void* memalloc(size_t size)
 
 static void* memfree(void)
 {
-    if (munmap(membase, membytes)) {
+    if (zmunmap(membase, membytes)) {
         zprintf("munmap error freeing %zub of memory.\n", membytes);
         return MAP_FAILED;
     }
@@ -170,7 +169,7 @@ static void memnode_trim(memnode_t* curr)
         }
 
         membytes -= free_size;
-        if (munmap(membase + membytes, free_size)) {
+        if (zmunmap(membase + membytes, free_size)) {
             zprintf("munmap error freeing %zub of memory.\n", free_size);
             return;
         }
@@ -308,7 +307,7 @@ void* zfmalloc(int fd, size_t size)
         alloc_size *= 2;
     }
     
-    void* mem = mmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    void* mem = zmmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
     if (!mem || mem == MAP_FAILED) {
         zprintf("fmalloc failed to allocate %zub of memory.\n", alloc_size);
         return NULL;
@@ -319,7 +318,7 @@ void* zfmalloc(int fd, size_t size)
         zmemcpy(ret, mem, size);
     }
 
-    if (munmap(mem, alloc_size)) {
+    if (zmunmap(mem, alloc_size)) {
         zprintf("munmap error freeing %zub of memory.\n", alloc_size);
         zabort();
     }

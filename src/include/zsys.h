@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <sys/mman.h>
 
 #ifdef __APPLE__
 #define SYS_OS_OFFSET 0x2000000
@@ -25,6 +26,13 @@
 #endif
 
 optnone
-int zsyscall(int op, ...);
+long zsyscall(long op, ...);
+
+int zopen(char* fpath, int flag);
+int zwrite(int fd, const void* buf, size_t size);
+int zfstat(int fd, struct stat *st);
+
+void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset);
+int zmunmap(void* addr, size_t size);
 
 #endif /* Z_SYS_H */
