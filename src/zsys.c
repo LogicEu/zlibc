@@ -43,10 +43,13 @@ int zfstat(int fd, struct stat *st)
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
-    return (void*)(size_t)zsyscall(SYS_mmap + SYS_OS_OFFSET, addr, size, prot, flags, fd, offset);
+    /*return (void*)(size_t)zsyscall(SYS_mmap + SYS_OS_OFFSET, addr, size,
+     *prot, flags, fd, offset);*/
+    return mmap(addr, size, prot, flags, fd, offset);
 }
 
 int zmunmap(void* addr, size_t size)
 {
-    return zsyscall(SYS_munmap + SYS_OS_OFFSET, addr, size);
+    /* return zsyscall(SYS_munmap + SYS_OS_OFFSET, addr, size); */
+    return munmap(addr, size);
 }
