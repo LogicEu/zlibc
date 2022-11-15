@@ -10,7 +10,7 @@ int zatexit(void (*function)(void))
 {
     static const char errmsg[] = "zatexit only supports 32 functions to be registered.\n";
     if (zexit_funccount == Z_ATEXIT_FUNC_MAX) {
-        zsyscall(SYS_write + SYS_OS_OFFSET, SYS_STDERR, errmsg, sizeof(errmsg));
+        zwrite(SYS_STDERR, errmsg, sizeof(errmsg));
         return -1;
     }
     
@@ -23,12 +23,12 @@ void zexit(int status)
     while (--zexit_funccount >= 0) {
         zexit_funcs[zexit_funccount]();
     }
-    zsyscall(SYS_exit + SYS_OS_OFFSET, status);
+    zsyscall(SYS_exit + SYS_BASE, status);
 }
 
 void zabort(void)
 {
     static const char errmsg[] = "zabort!\n";
-    zsyscall(SYS_write + SYS_OS_OFFSET, SYS_STDERR, errmsg, sizeof(errmsg));
-    zsyscall(SYS_exit + SYS_OS_OFFSET, Z_EXIT_FAILURE);
+    zwrite(SYS_STDERR, errmsg, sizeof(errmsg));
+    zsyscall(SYS_exit + SYS_BASE, Z_EXIT_FAILURE);
 }

@@ -21,6 +21,7 @@ long zsyscall(long op, ...)
         "\tmov r4, r5\n"
         "\tmov r5, r6\n"
         "\tsvc #0\n"
+        "\tbx lr\n"
 #endif
     );
     return op;
@@ -28,28 +29,42 @@ long zsyscall(long op, ...)
 
 int zopen(char* fpath, int flag)
 {
-    return zsyscall(SYS_open + SYS_OS_OFFSET, fpath, flag);
+    return zsyscall(SYS_open + SYS_BASE, fpath, flag);
+}
+
+int zclose(int fd)
+{
+    return zsyscall(SYS_close + SYS_BASE, fd);
 }
 
 int zwrite(int fd, const void* buf, size_t size)
 {
-    return zsyscall(SYS_write + SYS_OS_OFFSET, fd, buf, size);
+    return zsyscall(SYS_write + SYS_BASE, fd, buf, size);
+}
+
+ssize_t zread(int fd, void* dst, size_t size)
+{
+    return zsyscall(SYS_read + SYS_BASE, fd, dst, size);
 }
 
 int zfstat(int fd, struct stat *st)
 {
-    return zsyscall(SYS_fstat64 + SYS_OS_OFFSET, fd, st);
+#if defined __x86_64__ && defined __APPLE__
+    return zsyscall(SYS_fstat64 + SYS_BASE, fd, st);
+#else 
+    /*return zsyscall(SYS_fstatfs + SYS_BASE, fd, st);*/
+    return fstat(fd, st);
+#endif
 }
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
-    /*return (void*)(size_t)zsyscall(SYS_mmap + SYS_OS_OFFSET, addr, size,
-     *prot, flags, fd, offset);*/
+    /*return (void*)(size_t)zsyscall(SYS_mmap2 + SYS_BASE, addr, size, prot, flags, fd, offset);*/
     return mmap(addr, size, prot, flags, fd, offset);
 }
 
 int zmunmap(void* addr, size_t size)
 {
-    /* return zsyscall(SYS_munmap + SYS_OS_OFFSET, addr, size); */
+    /*return zsyscall(SYS_munmap + SYS_BASE, addr, size);*/
     return munmap(addr, size);
 }

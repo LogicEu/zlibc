@@ -8,7 +8,7 @@ static char stdio_buffer[BUFSIZ];
 
 static int zsysprint(const char* str, int fd, int len)
 {
-    return zsyscall(SYS_write + SYS_OS_OFFSET, fd, str, len);
+    return zwrite(fd, str, len);
 }
 
 static size_t zioflush(int fd, size_t len)
