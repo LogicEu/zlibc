@@ -68,8 +68,13 @@ static char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
         }
         case 's': {
             char* s = va_arg(ap, char*);
-            *len = i + zstrlen(s);
             *end = fmt;
+            if (!s) {
+                static const char nullstr[] = "(null)";
+                *len = sizeof(nullstr);
+                return "(null)";
+            }
+            *len = i + zstrlen(s);
             return s;
         }
         case 'd': {
