@@ -34,7 +34,7 @@ void zsysexit(int status)
     zabort();
 }
 
-int zopen(char* fpath, int flag)
+int zopen(const char* fpath, int flag)
 {
     return zsyscall(SYS_open + SYS_BASE, fpath, flag);
 }
