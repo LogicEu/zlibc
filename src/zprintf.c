@@ -47,7 +47,7 @@ static size_t zioflush(int fd, size_t len)
     }                                                           \
 } while (0)
 
-static char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
+static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
 {
     static char buf[BUFSIZ];
     
@@ -67,12 +67,12 @@ static char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
             break;
         }
         case 's': {
-            char* s = va_arg(ap, char*);
+            const char* s = va_arg(ap, char*);
             *end = fmt;
             if (!s) {
                 static const char nullstr[] = "(null)";
                 *len = sizeof(nullstr);
-                return "(null)";
+                return nullstr;
             }
             *len = i + zstrlen(s);
             return s;
@@ -125,7 +125,7 @@ static char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
 
 int zvsprintf(char* buf, const char* fmt, va_list ap)
 {
-    char* arg;
+    const char* arg;
     size_t i = 0, len;
     while (*fmt) {
         if (*fmt == '%') {
@@ -143,7 +143,7 @@ int zvsprintf(char* buf, const char* fmt, va_list ap)
 
 int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
 {
-    char* arg;
+    const char* arg;
     size_t i = 0, len;
     while (*fmt && i + 1 >= BUFSIZ) {
         if (*fmt == '%') {
@@ -180,7 +180,7 @@ int zsprintf(char* buf, const char* fmt, ...)
 
 int zvdprintf(int fd, const char* fmt, va_list ap)
 {
-    char* arg;
+    const char* arg;
     size_t i = 0, len, ret = 0;
     while (*fmt) {
         if (*fmt == '%') {
@@ -221,14 +221,14 @@ int zdprintf(int fd, const char* fmt, ...)
 
 int zvprintf(const char* fmt, va_list ap)
 {
-    return zvdprintf(SYS_STDOUT, fmt, ap);
+    return zvdprintf(STDOUT, fmt, ap);
 }
 
 int zprintf(const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvdprintf(SYS_STDOUT, fmt, ap);
+    int ret = zvdprintf(STDOUT, fmt, ap);
     va_end(ap);
     return ret;
 }

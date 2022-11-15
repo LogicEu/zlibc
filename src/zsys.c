@@ -1,6 +1,8 @@
 #include <zsys.h>
 
-long zsyscall(long op, ...)
+extern void zabort(void) __attribute__((noreturn));
+
+long zsyscall(__attribute__((unused)) long op, ...)
 {
     __asm__ volatile (
 #ifdef __x86_64__
@@ -12,7 +14,7 @@ long zsyscall(long op, ...)
         "\tmovq %r9, %r8\n"
         "\tmovq 8(%rsp), %r9\n"
         "\tsyscall\n"
-        "\tmovq %rax, -8(%rbp)\n"
+        "\tretq\n"
 #elif __arm__
         "\tmov r7, r0\n"
         "\tmov r0, r1\n"
@@ -24,7 +26,12 @@ long zsyscall(long op, ...)
         "\tbx lr\n"
 #endif
     );
-    return op;
+}
+
+void zsysexit(int status)
+{
+    zsyscall(SYS_exit + SYS_BASE, status);
+    zabort();
 }
 
 int zopen(char* fpath, int flag)

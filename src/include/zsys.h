@@ -17,18 +17,16 @@
 #define SYS_STDOUT 1
 #define SYS_STDERR 2
 
-#if defined (__clang__)
-    #define optasm __attribute__((optnone))
-#elif defined (__GNUC__)
-    #define optasm __attribute__((naked))
-#else
-    #define optasm 
-#endif
+#define STDIN SYS_STDIN
+#define STDOUT SYS_STDOUT
+#define STDERR SYS_STDERR
 
-optasm
+__attribute__((naked)) 
 long zsyscall(long op, ...);
+void zsysexit(int status) __attribute__((noreturn));
 
 int zopen(char* fpath, int flag);
+int zclose(int fd);
 int zwrite(int fd, const void* buf, size_t size);
 ssize_t zread(int fd, void* dst, size_t size);
 int zfstat(int fd, struct stat *st);

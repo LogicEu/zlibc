@@ -6,8 +6,8 @@
 #define Z_EXIT_FAILURE 1
 #define Z_EXIT_SUCCESS 0
 
-void zabort(void);
-void zexit(int status);
+void zabort(void) __attribute__((noreturn));
+void zexit(int status) __attribute__((noreturn));
 int zatexit(void (*func)(void));
 
 void* zmalloc(size_t size);
