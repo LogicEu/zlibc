@@ -10,6 +10,7 @@ flags=(
     -fno-stack-protector
     -Wall
     -Wextra
+    -pedantic
     -O2
     -Isrc/include
 )

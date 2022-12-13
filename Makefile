@@ -1,7 +1,7 @@
 # zlibc makefile
 
 STD=-std=c89 -nostdlib -fno-stack-protector
-WFLAGS=-Wall -Wextra
+WFLAGS=-Wall -Wextra -pedantic
 OPT=-O2
 IDIR=-Isrc/include
 CC=gcc

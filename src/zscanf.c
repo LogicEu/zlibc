@@ -6,17 +6,20 @@
 
 int zvsscanf(const char* str, const char* fmt, va_list ap)
 {
+    int* n;
+    char* s;
+    float* f;
     int matches = 0;
     while (*fmt && *str) {
         if (*fmt == '%') {
             ++fmt;
             switch (*fmt) {
                 case 'd': {
-                    char* end = NULL;
-                    int* n = va_arg(ap, int*);
-                    *n = (int)zstrtol(str, &end, 10);
-                    if (str != end) {
-                        str += end - str - 1;
+                    s = NULL;
+                    n = va_arg(ap, int*);
+                    *n = (int)zstrtol(str, &s, 10);
+                    if (str != s) {
+                        str += s - str - 1;
                     } else {
                         return matches;
                     }
@@ -27,8 +30,8 @@ int zvsscanf(const char* str, const char* fmt, va_list ap)
                         ++str;
                     }
                     
-                    char* c = va_arg(ap, char*);
-                    *c = *str++;
+                    s = va_arg(ap, char*);
+                    *s = *str++;
                     break;
                 }
                 case 's': {
@@ -36,7 +39,7 @@ int zvsscanf(const char* str, const char* fmt, va_list ap)
                         ++str;
                     }
 
-                    char* s = va_arg(ap, char*);
+                    s = va_arg(ap, char*);
                     while (_isgraph(*str)) {
                         *s++ = *str++;
                     }
@@ -46,11 +49,11 @@ int zvsscanf(const char* str, const char* fmt, va_list ap)
                     break;
                 }
                 case 'f': {
-                    char* end = NULL;
-                    float* n = va_arg(ap, float*);
-                    *n = (float)zstrtod(str, &end);
-                    if (str != end) {
-                        str += end - str - 1;
+                    s = NULL;
+                    f = va_arg(ap, float*);
+                    *f = (float)zstrtod(str, &s);
+                    if (str != s) {
+                        str += s - str - 1;
                     }
                     break;
                 }
@@ -76,9 +79,11 @@ int zvsscanf(const char* str, const char* fmt, va_list ap)
 
 int zsscanf(const char* str, const char* fmt, ...)
 {
+    int ret;
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvsscanf(str, fmt, ap);
+    ret = zvsscanf(str, fmt, ap);
     va_end(ap);
     return ret;
 }
+

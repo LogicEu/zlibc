@@ -169,3 +169,78 @@ char* zstrnrev(char* str, size_t len)
     }
     return str;
 }
+
+char* zstrtok(char* str, const char* div)
+{
+    static char* ptr = NULL;
+ 
+    char* ret = ptr;
+    size_t i, j, f = 0;   
+
+    if (!div) {
+        return NULL;
+    }
+
+    if (str) {
+        ptr = str;
+    }
+
+    if (!ptr) {
+        return NULL;
+    }
+
+    for (i = 0; ret[i] && !f; ++i) {
+        for (j = 0; div[j]; ++j) {
+            if (ret[i] == div[j]) {
+                ret[i] = 0;
+                f = i + 1;
+                break;
+            }
+        }
+    }
+    
+    if (!f) {
+        ptr = NULL;
+        return ret;
+    }
+    
+    for (i = f; ret[i]; ++i) {
+        f = 0;
+        for (j = 0; div[j]; ++j) {
+            if (ret[i] == div[j]) {
+                ++f;
+            }
+        }
+        if (!f) {
+            ptr = ret + i;
+            break;
+        }
+        ret[i] = 0;
+    }
+
+    if (!ret[i]) {
+        ptr = NULL;
+    }
+
+    return ret;
+}
+
+extern void* zmalloc(size_t size);
+
+char* zstrdup(const char* str)
+{
+    char* ret;
+    size_t len = zstrlen(str);
+    ret = zmalloc(len + 1);
+    zmemcpy(ret, str, len + 1);
+    return ret;
+}
+
+char* zstrndup(const char* str, size_t len)
+{
+    char* ret = zmalloc(len + 1);
+    zmemcpy(ret, str, len);
+    ret[len] = 0;
+    return ret;
+}
+

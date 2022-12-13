@@ -85,3 +85,4 @@ double zatof(const char* str)
 
     return n * sign;
 }
+

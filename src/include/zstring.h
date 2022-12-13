@@ -24,5 +24,8 @@ char* zstrchr(const char* str, const int c);
 char* zstrstr(const char* big, const char* small);
 char* zstrrev(char* str);
 char* zstrnrev(char* str, size_t len);
+char* zstrdup(const char* str);
+char* zstrndup(const char* str, size_t len);
+char* zstrtok(char* str, const char* div);
 
 #endif /* Z_STRING_H */

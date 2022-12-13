@@ -44,7 +44,7 @@ static void* memalloc(size_t size)
             membase = mem;
         }
     }
-    else mem = zmmap(membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, 0, 0);
+    else mem = zmmap((char*)membase + membytes, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, 0, 0);
     
     if (mem && mem != MAP_FAILED) {
         membytes += size;
@@ -169,7 +169,7 @@ static void memnode_trim(memnode_t* curr)
         }
 
         membytes -= free_size;
-        if (zmunmap(membase + membytes, free_size)) {
+        if (zmunmap((char*)membase + membytes, free_size)) {
             zprintf("munmap error freeing %zub of memory.\n", free_size);
             return;
         }
@@ -192,15 +192,16 @@ void* zmalloc(size_t size)
 {
     void *mem;
     memnode_t *ptr;
+    size_t pad, alloc_size;
 
     if (!size) {
         return NULL;
     }
 
-    size_t pad = mempad(size + sizeof(memnode_t));
+    pad = mempad(size + sizeof(memnode_t));
     size = pad - sizeof(memnode_t);
 
-    size_t alloc_size = PAGESIZE;
+    alloc_size = PAGESIZE;
     while (pad > alloc_size) {
         alloc_size *= 2;
     }
@@ -245,11 +246,13 @@ void* zmalloc(size_t size)
 
 void zfree(void *ptr)
 {
+    memnode_t* node;
+
     if (!ptr) {
         return;
     }
 
-    memnode_t* node = MEMNODE(ptr);
+    node = MEMNODE(ptr);
     if (memnode_checksum(node, MEMCHECK_OWND)) {
         zprintf("free error: object being freed was not allocated (%p).\n", ptr);
         zabort();
@@ -262,23 +265,27 @@ void zfree(void *ptr)
 
 void* zrealloc(void* ptr, size_t size)
 {
+    void* mem;
+    memnode_t* node;
+    size_t node_size;
+
     if (!ptr) {
         return zmalloc(size);
     }
 
-    memnode_t* node = MEMNODE(ptr);
+    node = MEMNODE(ptr);
     if (memnode_checksum(node, MEMCHECK_OWND)) {
         zprintf("realloc error: object being reallocated was not allocated (%p).\n", ptr);
         zabort();
     }
 
-    size_t node_size = node->size;
+    node_size = node->size;
     memnode_add(node);
     node = memnode_merge();
 
-    void* mem = zmalloc(size);
+    mem = zmalloc(size);
     if (mem && mem != ptr) {
-        size_t len = size < node_size ? size : node_size;
+        const size_t len = size < node_size ? size : node_size;
         zmemcpy(mem, ptr, len);
     }
 
@@ -298,22 +305,24 @@ void* zcalloc(size_t count, size_t size)
 
 void* zfmalloc(int fd, size_t size)
 {
+    void* mem, *ret;
+    size_t alloc_size = PAGESIZE;
+    
     if (!size) {
         return NULL;
     }
 
-    size_t alloc_size = PAGESIZE;
     while (size > alloc_size) {
         alloc_size *= 2;
     }
     
-    void* mem = zmmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    mem = zmmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
     if (!mem || mem == MAP_FAILED) {
         zprintf("fmalloc failed to allocate %zub of memory.\n", alloc_size);
         return NULL;
     }
 
-    void* ret = zmalloc(size);
+    ret = zmalloc(size);
     if (ret) {
         zmemcpy(ret, mem, size);
     }
@@ -330,15 +339,16 @@ void* zfmalloc(int fd, size_t size)
 
 void zmalloc_inspect(void)
 {
+    const size_t end = (size_t)membase + membytes;
+    size_t freelen = 0, alloclen = 0;
+    memnode_t* curr = membase;
+    
     zprintf("Address: %p\nSize: %zuKb\n", membase, membytes >> 10);
 
     if (!membase) {
         return;
     }
 
-    size_t freelen = 0, alloclen = 0;
-    memnode_t* curr = membase;
-    const size_t end = (size_t)membase + membytes;
     while ((size_t)curr < end) {
         switch (curr->checksum) {
             case MEMCHECK_FREE:
@@ -360,3 +370,4 @@ void zmalloc_inspect(void)
 }
 
 #endif
+

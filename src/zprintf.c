@@ -28,9 +28,6 @@ static size_t zioflush(int fd, size_t len)
             i += zltoa(va_arg(ap, long type), buf + i, base);   \
             break;                                              \
         }                                                       \
-        case 2: {                                               \
-            i += zlltoa(va_arg(ap, long long type), buf + i, base);\
-        }                                                       \
     }                                                           \
 } while (0)
 
@@ -42,8 +39,6 @@ static size_t zioflush(int fd, size_t len)
         case 1:                                                 \
             i += zultoa(va_arg(ap, long type), buf + i, base);  \
             break;                                              \
-        case 2:                                                 \
-            i += zulltoa(va_arg(ap, long long type), buf + i, base);\
     }                                                           \
 } while (0)
 
@@ -52,7 +47,7 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
     static char buf[BUFSIZ];
     
     size_t l, i = 0;
-    for (l = 0; *fmt == 'l' && l < 2; ++l) {
+    for (l = 0; *fmt == 'l' && l < 1; ++l) {
         ++fmt;
     }
     
@@ -108,9 +103,9 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
             break;
         }
         case 'p': {
+            void* n = va_arg(ap, void*);
             buf[i++] = '0';
             buf[i++] = 'x';
-            void* n = va_arg(ap, void*);
             i += zztoa((size_t)n, buf + i, 16);
             break;
         }
@@ -162,18 +157,20 @@ int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
 
 int zsnprintf(char* buf, size_t size, const char* fmt, ...)
 {
+    int ret;
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvsnprintf(buf, size, fmt, ap);
+    ret = zvsnprintf(buf, size, fmt, ap);
     va_end(ap);
     return ret;
 }
 
 int zsprintf(char* buf, const char* fmt, ...)
 {
+    int ret;
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvsprintf(buf, fmt, ap);
+    ret = zvsprintf(buf, fmt, ap);
     va_end(ap);
     return ret;
 }
@@ -212,9 +209,10 @@ int zvdprintf(int fd, const char* fmt, va_list ap)
 
 int zdprintf(int fd, const char* fmt, ...)
 {
+    int ret;
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvdprintf(fd, fmt, ap);
+    ret = zvdprintf(fd, fmt, ap);
     va_end(ap);
     return ret;
 }
@@ -226,9 +224,10 @@ int zvprintf(const char* fmt, va_list ap)
 
 int zprintf(const char* fmt, ...)
 {
+    int ret;
     va_list ap;
     va_start(ap, fmt);
-    int ret = zvdprintf(STDOUT, fmt, ap);
+    ret = zvdprintf(STDOUT, fmt, ap);
     va_end(ap);
     return ret;
 }

@@ -23,16 +23,20 @@ double zatof(const char* arg);
 
 int zitoa(int num, char* buf, const int base);
 int zltoa(long num, char* buf, const int base);
-int zlltoa(long long num, char* buf, const int base);
 int zutoa(unsigned int num, char* buf, const int base);
 int zultoa(unsigned long num, char* buf, const int base);
-int zulltoa(unsigned long long num, char* buf, const int base);
 int zztoa(size_t num, char* buf, const int base);
 int zftoa(double num, char* buf, int presicion);
 
 long zstrtol(const char* str, char** endptr, int base);
 unsigned long zstrtoul(const char* str, char** endptr, int base);
 double zstrtod(const char* str, char** endptr);
+
+void zqsort(void* base, size_t count, size_t bytes, 
+            int (*cmpfunc)(const void*, const void*));
+
+void zsrand(unsigned int seed);
+int zrand(void);
 
 #endif /* Z_STDLIB_H */
 

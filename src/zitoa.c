@@ -60,35 +60,6 @@ int zltoa(long num, char* buf, const int base)
     return i;
 }
 
-int zlltoa(long long num, char* buf, const int base)
-{
-    int i = 0, neg = 0;
-    if (!num) {
-        buf[i++] = '0';
-        buf[i] = 0;
-        return i;
-    }
- 
-    if (num < 0 && base == 10) {
-        ++neg;
-        num = -num;
-    }
- 
-    while (num) {
-        int rem = num % base;
-        buf[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        num = num / base;
-    }
- 
-    if (neg) {
-        buf[i++] = '-';
-    }
- 
-    buf[i] = 0;
-    zstrnrev(buf, i);
-    return i;
-}
-
 int zutoa(unsigned int num, char* buf, const int base)
 {
     int i = 0;
@@ -110,26 +81,6 @@ int zutoa(unsigned int num, char* buf, const int base)
 }
 
 int zultoa(unsigned long num, char* buf, const int base)
-{
-    int i = 0;
-    if (!num) {
-        buf[i++] = '0';
-        buf[i] = 0;
-        return i;
-    }
- 
-    while (num) {
-        int rem = num % base;
-        buf[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        num = num / base;
-    }
- 
-    buf[i] = 0;
-    zstrnrev(buf, i);
-    return i;
-}
-
-int zulltoa(unsigned long long num, char* buf, const int base)
 {
     int i = 0;
     if (!num) {
@@ -217,3 +168,4 @@ int zftoa(double f, char *buf, int precision)
 	buf[i] = 0;
 	return i;
 }
+

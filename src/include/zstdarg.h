@@ -16,4 +16,5 @@ int zvprintf(const char* str, va_list ap);
 
 int zvsscanf(const char* str, const char* fmt, va_list ap);
 
-#endif
+#endif /* Z_STDARG_H */
+
