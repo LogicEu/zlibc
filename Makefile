@@ -1,36 +1,76 @@
 # zlibc makefile
 
-STD=-std=c89 -nostdlib -fno-stack-protector
-WFLAGS=-Wall -Wextra -pedantic
-OPT=-O2
-IDIR=-Isrc/include
-CC=gcc
-NAME=libzlibc
-SRC=src/*.c
+NAME = libzlibc
+
+CC = gcc
+STD = -std=c89
+NOSTD = -nostdlib -fno-stack-protector
+WFLAGS = -Wall -Wextra -pedantic
+OPT = -O2
+
+TESTDIR = tests
+SRCDIR = src
+TMPDIR = tmp
+BINDIR = bin
+INCDIR = src/include
+
+CRT = -Lbin -lzlibc
+INC = -I$(INCDIR)
+SRC = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(patsubst $(SRCDIR)/%.c,$(TMPDIR)/%.o,$(SRC))
 
 OS=$(shell uname -s)
-
 ifeq ($(OS),Darwin)
-	OSFLAGS=-dynamiclib -lSystem
-	LIB=$(NAME).dylib
+    DLIB = -dynamiclib
+    LIBS = -lSystem
+    CRT += -e _start 
+    SUFFIX = .dylib
 else
-	OSFLAGS=-shared -fPIC
-	LIB=$(NAME).so
+    DLIB = -shared -fPIC -lgcc -lc
+    LIBS = -lgcc -lc
+    CRT += -e start
+    SUFFIX = .so
 endif
 
-CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
+CRTFILE = $(SRCDIR)/crt/crt0.c
+SCRIPT = build.sh
+TARGET = $(BINDIR)/$(NAME)
+LIB = $(TARGET)$(SUFFIX)
 
-$(NAME).a: $(SRC)
-	$(CC) $(CFLAGS) -c $(SRC) && ar -cr $(NAME).a *.o && rm *.o
+CFLAGS = $(STD) $(WFLAGS) $(OPT) $(INC)
 
-shared: $(SRC)
-	$(CC) -o $(LIB) $(SRC) $(CFLAGS) $(OSFLAGS)
+$(TARGET).a: $(BINDIR) $(OBJS)
+	ar -cr $@ $(OBJS)
 
-clean: build.sh
+.PHONY: shared all clean install uninstall
+
+$(TESTDIR)/%.c: $(CRTFILE) $(LIB)
+	$(CC) $(CFLAGS) $(NOSTD) $(LIBS) $(CRT) $@ $<
+
+shared: $(LIB)
+
+all: $(LIB) $(TARGET).a
+
+$(LIB): $(BINDIR) $(OBJS)
+	$(CC) $(NOSTD) $(LIBS) $(DLIB) -o $@ $(OBJS)
+
+$(TMPDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJS): | $(TMPDIR)
+
+$(TMPDIR):
+	mkdir -p $@
+
+$(BINDIR):
+	mkdir -p $@
+
+clean: $(SCRIPT)
 	./$^ $@
 
-install: build.sh
+install: $(SCRIPT)
 	./$^ $@
 
-uninstall: build.sh
+uninstall: $(SCRIPT)
 	./$^ $@
+
