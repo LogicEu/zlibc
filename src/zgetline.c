@@ -6,7 +6,7 @@
 
 ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd)
 {
-    char c;
+    signed char c;
     ssize_t out = 0;
 
     if (!linep[0]) {
@@ -17,7 +17,7 @@ ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd)
     do {
         
         zread(fd, &c, 1);
-        if (c == EOF) {
+        if (c == Z_EOF) {
             return -1;
         }
 

@@ -5,7 +5,7 @@
 #include <zstddef.h>
 
 #define BUFSIZ 1024
-#define EOF (-1)
+#define Z_EOF (-1)
 
 int zsnprintf(char* buf, size_t size, const char* fmt, ...);
 int zsprintf(char* buf, const char* fmt, ...);

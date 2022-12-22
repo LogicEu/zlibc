@@ -10,7 +10,12 @@ extern int zprintf(const char* fmt, ...);
 #define PAGESIZE 4096
 #endif
 
+#if !defined __arm__
 #define MEMHINT_FILE (void*)0x600020000000UL
+#else
+#define MEMHINT_FILE (void*)0x1000000UL
+#endif
+
 #define MEMCHECK_OWND 0x77777777UL
 #define MEMCHECK_FREE 0xfedcba01UL
 

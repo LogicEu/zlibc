@@ -61,7 +61,7 @@ shared() {
 }
 
 exe() {
-    comp $cc ${flags[*]} ${nostd[*]} ${crt[*]} ${libs[*]} -Lbin -lzlibc $1 src/crt/crt0.c
+    comp $cc $1 src/crt/crt0.c ${flags[*]} ${nostd[*]} ${crt[*]} -Lbin -lzlibc ${libs[*]}
 }
 
 static() {

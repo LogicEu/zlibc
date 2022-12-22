@@ -14,7 +14,7 @@ TMPDIR = tmp
 BINDIR = bin
 INCDIR = src/include
 
-CRT = -Lbin -lzlibc
+LDIR = -Lbin -lzlibc
 INC = -I$(INCDIR)
 SRC = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c,$(TMPDIR)/%.o,$(SRC))
@@ -23,36 +23,38 @@ OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
     DLIB = -dynamiclib
     LIBS = -lSystem
-    CRT += -e _start 
+    CRT = -nostartfiles -e _start 
     SUFFIX = .dylib
 else
-    DLIB = -shared -fPIC -lgcc -lc
+    DLIB = -shared -fPIC
     LIBS = -lgcc -lc
-    CRT += -e start
+    CRT = -nostartfiles -e start
     SUFFIX = .so
 endif
 
-CRTFILE = $(SRCDIR)/crt/crt0.c
 SCRIPT = build.sh
+CRTFILE = $(SRCDIR)/crt/crt0.c
 TARGET = $(BINDIR)/$(NAME)
 LIB = $(TARGET)$(SUFFIX)
 
 CFLAGS = $(STD) $(WFLAGS) $(OPT) $(INC)
 
-$(TARGET).a: $(BINDIR) $(OBJS)
-	ar -cr $@ $(OBJS)
+.PHONY: static shared all clean install uninstall
 
-.PHONY: shared all clean install uninstall
-
-$(TESTDIR)/%.c: $(CRTFILE) $(LIB)
-	$(CC) $(CFLAGS) $(NOSTD) $(LIBS) $(CRT) $@ $<
+static: $(TARGET).a
 
 shared: $(LIB)
 
 all: $(LIB) $(TARGET).a
 
+$(TESTDIR)/%.c: $(CRTFILE) $(TARGET).a
+	$(CC) $@ $< $(CFLAGS) $(NOSTD) $(LDIR) $(LIBS) $(CRT)
+
 $(LIB): $(BINDIR) $(OBJS)
-	$(CC) $(NOSTD) $(LIBS) $(DLIB) -o $@ $(OBJS)
+	$(CC) $(OBJS) -o $@ $(NOSTD) $(LIBS) $(DLIB)
+
+$(TARGET).a: $(BINDIR) $(OBJS)
+	ar -cr $@ $(OBJS)
 
 $(TMPDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
