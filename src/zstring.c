@@ -1,65 +1,30 @@
-#include <zstring.h>
-#define MEMOPT 1
+#include <zstddef.h>
+
+extern void* zmalloc(size_t);
 
 void* zmemcpy(void* dst, const void* src, size_t n)
 {
-#if MEMOPT
-    if ((size_t)dst % sizeof(void*) == 0 && 
-        (size_t)src % sizeof(void*) == 0 && 
-        n % sizeof(void*) == 0) {
-        long* a = dst;
-        const long* b = src;
-        n /= sizeof(void*);
-        while (n--) {
-            *a++ = *b++;
-        }
-    } else {
-#endif
-        unsigned char* a = dst;
-        const unsigned char* b = src;
-        while (n--) {
-            *a++ = *b++;
-        }
-#if MEMOPT
+    unsigned char* a = dst;
+    const unsigned char* b = src;
+    while (n--) {
+        *a++ = *b++;
     }
-#endif
     return dst;
 }
 
 void* zmemmove(void* dst, const void* src, size_t n)
 {
-#if MEMOPT
-    if ((size_t)dst % sizeof(void*) == 0 && 
-        (size_t)src % sizeof(void*) == 0 && 
-        n % sizeof(void*) == 0) {
-        long* a = dst;
-        const long* b = src;
-        n /= sizeof(void*);
-        if (a < b) {
-            while (n--) {
-                *a++ = *b++;
-            }
-        } else {
-            while (n--) {
-                a[n] = b[n];
-            }
+    unsigned char* a = dst;
+    const unsigned char* b = src;
+    if (a < b) {
+        while (n--) {
+            *a++ = *b++;
         }
     } else {
-#endif
-        unsigned char* a = dst;
-        const unsigned char* b = src;
-        if (a < b) {
-            while (n--) {
-                *a++ = *b++;
-            }
-        } else {
-            while (n--) {
-                a[n] = b[n];
-            }
+        while (n--) {
+            a[n] = b[n];
         }
-#if MEMOPT
     }
-#endif
     return dst;
 }
 
@@ -148,28 +113,6 @@ char* zstrstr(const char* big, const char* small)
     return NULL;
 }
 
-char* zstrrev(char* str)
-{
-    size_t len = zstrlen(str), i = 0;
-    while (i < len) {
-        char c = str[i];
-        str[i++] = str[len - 1];
-        str[--len] = c;
-    }
-    return str;
-}
-
-char* zstrnrev(char* str, size_t len)
-{
-    size_t i = 0;
-    while (i < len) {
-        char c = str[i];
-        str[i++] = str[len - 1];
-        str[--len] = c;
-    }
-    return str;
-}
-
 char* zstrtok(char* str, const char* div)
 {
     static char* ptr = NULL;
@@ -224,8 +167,6 @@ char* zstrtok(char* str, const char* div)
 
     return ret;
 }
-
-extern void* zmalloc(size_t size);
 
 char* zstrdup(const char* str)
 {

@@ -1,4 +1,6 @@
 #include <zsys.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
 
 extern void zabort(void) __attribute__((noreturn));
 

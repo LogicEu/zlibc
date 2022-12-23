@@ -219,7 +219,7 @@ int zdprintf(int fd, const char* fmt, ...)
 
 int zvprintf(const char* fmt, va_list ap)
 {
-    return zvdprintf(STDOUT, fmt, ap);
+    return zvdprintf(STDOUT_FILENO, fmt, ap);
 }
 
 int zprintf(const char* fmt, ...)
@@ -227,7 +227,7 @@ int zprintf(const char* fmt, ...)
     int ret;
     va_list ap;
     va_start(ap, fmt);
-    ret = zvdprintf(STDOUT, fmt, ap);
+    ret = zvdprintf(STDOUT_FILENO, fmt, ap);
     va_end(ap);
     return ret;
 }

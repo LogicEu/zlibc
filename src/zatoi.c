@@ -1,5 +1,4 @@
 #include <zctype.h>
-#include <zstdlib.h>
 
 int zatoi(const char* str)
 {

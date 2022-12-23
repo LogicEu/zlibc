@@ -1,8 +1,7 @@
 #include <zsys.h>
-#include <zstdio.h>
 #include <zstdlib.h>
 
-#define Z_GETDELIM_BUFSIZ 8
+#define Z_GETDELIM_BUFSIZ 32
 
 ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd)
 {
@@ -17,7 +16,7 @@ ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd)
     do {
         
         zread(fd, &c, 1);
-        if (c == Z_EOF) {
+        if (c == -1) {
             return -1;
         }
 

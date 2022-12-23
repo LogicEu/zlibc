@@ -1,6 +1,26 @@
-#include <zstdlib.h>
 #include <zstring.h>
-#include <zmath.h>
+
+static int zipow(int x, int y)
+{
+    int temp;
+    if (!y) {
+        return 1;
+    }
+
+    temp = zipow(x, y / 2);
+    temp *= temp;
+    return y % 2 ? temp * x : temp;
+}
+
+static void zstrnrev(char* str, size_t len)
+{
+    size_t i = 0;
+    while (i < len) {
+        char c = str[i];
+        str[i++] = str[len - 1];
+        str[--len] = c;
+    }
+}
 
 int zitoa(int num, char* buf, const int base)
 {

@@ -1,11 +1,9 @@
 #ifndef Z_SYSTEM_H
 #define Z_SYSTEM_H
 
-#include <sys/fcntl.h>
 #include <sys/types.h>
+#include <sys/fcntl.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
-#include <sys/mman.h>
 
 #ifdef __APPLE__
 #define SYS_BASE 0x2000000
@@ -13,13 +11,9 @@
 #define SYS_BASE 0x0000000
 #endif
 
-#define SYS_STDIN 0
-#define SYS_STDOUT 1
-#define SYS_STDERR 2
-
-#define STDIN SYS_STDIN
-#define STDOUT SYS_STDOUT
-#define STDERR SYS_STDERR
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 
 __attribute__((naked)) 
 long zsyscall(long op, ...);

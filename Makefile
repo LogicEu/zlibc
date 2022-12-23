@@ -51,7 +51,8 @@ $(TESTDIR)/%.c: $(CRTFILE) $(TARGET).a
 	$(CC) $@ $< $(CFLAGS) $(NOSTD) $(LDIR) $(LIBS) $(CRT)
 
 $(LIB): $(BINDIR) $(OBJS)
-	$(CC) $(OBJS) -o $@ $(NOSTD) $(LIBS) $(DLIB)
+	$(CC) $(OBJS) -o $(NAME)$(SUFFIX) $(NOSTD) $(LIBS) $(DLIB)
+	mv *$(SUFFIX) $<
 
 $(TARGET).a: $(BINDIR) $(OBJS)
 	ar -cr $@ $(OBJS)

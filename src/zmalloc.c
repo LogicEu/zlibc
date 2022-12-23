@@ -1,9 +1,10 @@
 #define _DEFAULT_SOURCE
+#include <sys/mman.h>
+
 #include <zsys.h>
 #include <zstring.h>
-#include <zassert.h>
-#include <zstdlib.h>
 
+extern void zabort(void);
 extern int zprintf(const char* fmt, ...);
 
 #ifndef PAGESIZE

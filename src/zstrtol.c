@@ -1,5 +1,4 @@
-#include <zstdlib.h>
-#include <zsys.h>
+#include <zstddef.h>
 #include <zctype.h>
 
 long zstrtol(const char* str, char** endptr, int base)

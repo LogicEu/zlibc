@@ -1,8 +1,8 @@
+#include <zctype.h>
+#include <zstddef.h>
 #include <zstdarg.h>
-#include <zstdio.h>
 #include <zstdlib.h>
 #include <zstring.h>
-#include <zctype.h>
 
 int zvsscanf(const char* str, const char* fmt, va_list ap)
 {

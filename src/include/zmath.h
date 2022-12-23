@@ -13,6 +13,4 @@
 #define isfinite(f) (!isnan(f) && !isinf(f))
 #define signbit(f) ((*(((char*)&f) + sizeof(f) - 1) >> 7) & 1)
 
-int zipow(int x, int y);
-
 #endif /* Z_MATH_H */

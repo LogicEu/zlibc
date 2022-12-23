@@ -1,4 +1,3 @@
-#include <zstdlib.h>
 
 static unsigned int r[344] = {0};
 static int n = 0;
