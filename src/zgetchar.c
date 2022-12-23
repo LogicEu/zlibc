@@ -9,5 +9,5 @@ int zgetc(int fd)
 
 int zgetchar(void)
 {
-    return zputc(STDIN_FILENO);
+    return zgetc(STDIN_FILENO);
 }

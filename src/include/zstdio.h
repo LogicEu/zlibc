@@ -24,8 +24,8 @@ int zputchar(int c);
 
 int zsscanf(const char* str, const char* fmt, ...);
 
-int zgetc(int fd)
-int zgetchar(void)
+int zgetc(int fd);
+int zgetchar(void);
 
 ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd);
 ssize_t zgetline(char** linep, size_t* linecap, int fd);
