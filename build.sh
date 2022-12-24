@@ -3,19 +3,24 @@
 cc=gcc
 src=src/*.c
 name=libzlibc
+nostd=-nostdlib
 
 flags=(
     -std=c89
     -Wall
     -Wextra
     -pedantic
-    -O2
     -Isrc/include
 )
 
-nostd=(
-    -nostdlib
+opt=(
+    -O2
     -fno-stack-protector
+)
+
+crt=(
+    -nostartfiles
+    -e
 )
 
 if echo "$OSTYPE" | grep -q "darwin"; then
@@ -25,10 +30,7 @@ if echo "$OSTYPE" | grep -q "darwin"; then
     dlib=(
         -dynamiclib
     )
-    crt=(
-        -e
-        _start
-    )
+    entry=_start
     suffix=.dylib
 elif echo "$OSTYPE" | grep -q "linux"; then
     libs=(
@@ -39,10 +41,7 @@ elif echo "$OSTYPE" | grep -q "linux"; then
         -shared
         -fPIC
     )
-    crt=(
-        -e
-        start
-    )
+    entry=start
     suffix=.so
 else
     echo "This OS is not supported by this shell script yet..." && exit
@@ -54,19 +53,19 @@ comp() {
 
 shared() {
     mkdir -p tmp
-    comp $cc -c $src ${flags[*]} && mv *.o tmp/ || exit
+    comp $cc -c $src ${flags[*]} ${opt[*]} && mv *.o tmp/ || exit
     
     mkdir -p bin
-    comp $cc tmp/*.o -o bin/$name$suffix ${nostd[*]} ${libs[*]} ${dlib[*]}
+    comp $cc tmp/*.o -o bin/$name$suffix $nostd ${opt[*]} ${libs[*]} ${dlib[*]}
 }
 
 exe() {
-    comp $cc $1 src/crt/crt0.c ${flags[*]} ${nostd[*]} ${crt[*]} -Lbin -lzlibc ${libs[*]}
+    comp $cc $1 src/crt/crt0.c ${flags[*]} ${opt[*]} $nostd ${crt[*]} $entry -Lbin -lzlibc ${libs[*]}
 }
 
 static() {
     mkdir -p tmp
-    comp $cc -c $src ${flags[*]} && mv *.o tmp/ || exit
+    comp $cc -c $src ${flags[*]} ${opt[*]} && mv *.o tmp/ || exit
     
     mkdir -p bin
     ar -cr bin/$name.a tmp/*.o
@@ -138,6 +137,6 @@ case "$1" in
     *)
         for arg in $@
         do
-            exe $arg
+            [ -f $arg ] && exe $arg || echo "File not found '$arg'"
         done;;
 esac

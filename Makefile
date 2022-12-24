@@ -4,9 +4,9 @@ NAME = libzlibc
 
 CC = gcc
 STD = -std=c89
-NOSTD = -nostdlib -fno-stack-protector
+NOSTD = -nostdlib
 WFLAGS = -Wall -Wextra -pedantic
-OPT = -O2
+OPT = -O2 -fno-stack-protector
 
 TESTDIR = tests
 SRCDIR = src
