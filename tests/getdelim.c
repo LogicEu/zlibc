@@ -7,7 +7,7 @@ int main(void)
     char* line = NULL;
     ssize_t len;
 
-    while ((len = zgetdelim(&line, &cap, ' ', SYS_STDIN)) != -1) {
+    while ((len = zgetdelim(&line, &cap, ' ', STDIN_FILENO)) != -1) {
         line[len - 1] = 0;
         zprintf("%ld.- '%s'\n", len, line);
     }

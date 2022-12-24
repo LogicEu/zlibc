@@ -18,13 +18,15 @@ long zsyscall(__attribute__((unused)) long op, ...)
         "\tsyscall\n"
         "\tretq\n"
 #elif __arm__
+        "\tmov ip, sp\n"
+        "\tpush {r4, r5, r6, r7}\n"
         "\tmov r7, r0\n"
         "\tmov r0, r1\n"
         "\tmov r1, r2\n"
         "\tmov r2, r3\n"
-        "\tmov r4, r5\n"
-        "\tmov r5, r6\n"
+        "\tldm ip, {r3, r4, r5, r6}\n"
         "\tsvc #0\n"
+        "\tpop {r4, r5, r6, r7}\n"
         "\tbx lr\n"
 #endif
     );

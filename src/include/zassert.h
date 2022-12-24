@@ -16,7 +16,7 @@ do {                            \
             zassertmsg,         \
             #expr,              \
             __FILE__,           \
-            __FUNCTION__,       \
+            __func__,           \
             __LINE__            \
         );                      \
         zabort();               \
