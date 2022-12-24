@@ -63,19 +63,18 @@ int zfstat(int fd, struct stat *st)
 #if defined __x86_64__ && defined __APPLE__
     return zsyscall(SYS_fstat64 + SYS_BASE, fd, st);
 #else 
-    /*return zsyscall(SYS_fstatfs + SYS_BASE, fd, st);*/
-    return fstat(fd, st);
+    return zsyscall(SYS_fstatfs + SYS_BASE, fd, st);
 #endif
 }
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
-    /*return (void*)(size_t)zsyscall(SYS_mmap2 + SYS_BASE, addr, size, prot, flags, fd, offset);*/
-    return mmap(addr, size, prot, flags, fd, offset);
+    return (void*)zsyscall(SYS_mmap2 + SYS_BASE, addr, size, prot, flags, fd, offset);
+    /* return mmap(addr, size, prot, flags, fd, offset); */
 }
 
 int zmunmap(void* addr, size_t size)
 {
-    /*return zsyscall(SYS_munmap + SYS_BASE, addr, size);*/
-    return munmap(addr, size);
+    return zsyscall(SYS_munmap + SYS_BASE, addr, size);
+    /* return munmap(addr, size); */
 }
