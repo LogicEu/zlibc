@@ -1,8 +1,5 @@
 #include <zsys.h>
 #include <sys/syscall.h>
-#include <sys/mman.h>
-
-extern void zabort(void) __attribute__((noreturn));
 
 long zsyscall(__attribute__((unused)) long op, ...)
 {
@@ -32,10 +29,16 @@ long zsyscall(__attribute__((unused)) long op, ...)
     );
 }
 
+static void zsysnoret(int status) __attribute__((noreturn));
+static void zsysnoret(int status)
+{
+    zsysexit(status);
+}
+
 void zsysexit(int status)
 {
     zsyscall(SYS_exit + SYS_BASE, status);
-    zabort();
+    zsysnoret(status);
 }
 
 int zopen(const char* fpath, int flag)
@@ -69,7 +72,11 @@ int zfstat(int fd, struct stat *st)
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
+#if defined __x86_64__ && defined __APPLE__
+    return (void*)zsyscall(SYS_mmap + SYS_BASE, addr, size, prot, flags, fd, offset);
+#else 
     return (void*)zsyscall(SYS_mmap2 + SYS_BASE, addr, size, prot, flags, fd, offset);
+#endif
     /* return mmap(addr, size, prot, flags, fd, offset); */
 }
 
