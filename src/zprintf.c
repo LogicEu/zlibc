@@ -42,7 +42,7 @@ static size_t zioflush(int fd, size_t len)
     }                                                           \
 } while (0)
 
-static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list ap)
+static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list* ap)
 {
     static char buf[BUFSIZ];
     
@@ -57,12 +57,12 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
             break;
         }
         case 'c': {
-            int c = va_arg(ap, int);
+            int c = va_arg(*ap, int);
             buf[i++] = c;
             break;
         }
         case 's': {
-            const char* s = va_arg(ap, char*);
+            const char* s = va_arg(*ap, char*);
             *end = fmt;
             if (!s) {
                 static const char nullstr[] = "(null)";
@@ -73,37 +73,37 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
             return s;
         }
         case 'd': {
-            lli(buf, i, 10, l, ap, int);
+            lli(buf, i, 10, l, *ap, int);
             break;
         }
         case 'u': {
-            llu(buf, i, 10, l, ap, unsigned int);
+            llu(buf, i, 10, l, *ap, unsigned int);
             break;
         }
         case 'X':
         case 'x': {
             buf[i++] = '0';
             buf[i++] = 'x';
-            lli(buf, i, 16, l, ap, int);
+            lli(buf, i, 16, l, *ap, int);
             break;
         }
         case 'b': {
-            lli(buf, i, 2, l, ap, int);
+            lli(buf, i, 2, l, *ap, int);
             break;
         }
         case 'f': {
-            double n = va_arg(ap, double);
+            double n = va_arg(*ap, double);
             i += zftoa(n, buf + i, 7);
             break;
         }
         case 'z': {
-            size_t n = va_arg(ap, size_t);
+            size_t n = va_arg(*ap, size_t);
             i += zztoa(n, buf + i, 10);
             fmt += fmt[1] == 'u';
             break;
         }
         case 'p': {
-            void* n = va_arg(ap, void*);
+            void* n = va_arg(*ap, void*);
             buf[i++] = '0';
             buf[i++] = 'x';
             i += zztoa((size_t)n, buf + i, 16);
@@ -124,7 +124,7 @@ int zvsprintf(char* buf, const char* fmt, va_list ap)
     size_t i = 0, len;
     while (*fmt) {
         if (*fmt == '%') {
-            arg = zstrfmt(++fmt, &fmt, &len, ap);
+            arg = zstrfmt(++fmt, &fmt, &len, &ap);
             zmemcpy(buf + i, arg, len);
             i += len;
         }
@@ -142,7 +142,7 @@ int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
     size_t i = 0, len;
     while (*fmt && i + 1 >= BUFSIZ) {
         if (*fmt == '%') {
-            arg = zstrfmt(++fmt, &fmt, &len, ap);
+            arg = zstrfmt(++fmt, &fmt, &len, &ap);
             len = len + i > size ? size - len - 1 : len;
             zmemcpy(buf + i, arg, len);
             i += len;
@@ -181,7 +181,7 @@ int zvdprintf(int fd, const char* fmt, va_list ap)
     size_t i = 0, len, ret = 0;
     while (*fmt) {
         if (*fmt == '%') {
-            arg = zstrfmt(++fmt, &fmt, &len, ap);
+            arg = zstrfmt(++fmt, &fmt, &len, &ap);
             if (i + len >= BUFSIZ) {
                 ret += zioflush(fd, i);
                 i = 0;
@@ -202,7 +202,6 @@ int zvdprintf(int fd, const char* fmt, va_list ap)
             i = 0;
         }
     }
-    
     ret += zioflush(fd, i);
     return ret;
 }
