@@ -118,10 +118,12 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
     return buf;
 }
 
-int zvsprintf(char* buf, const char* fmt, va_list ap)
+int zvsprintf(char* buf, const char* fmt, va_list args)
 {
+    va_list ap;
     const char* arg;
     size_t i = 0, len;
+    va_copy(ap, args);
     while (*fmt) {
         if (*fmt == '%') {
             arg = zstrfmt(++fmt, &fmt, &len, &ap);
@@ -131,15 +133,18 @@ int zvsprintf(char* buf, const char* fmt, va_list ap)
         else buf[i++] = *fmt;
         ++fmt;
     }
-    
+
+    va_end(ap);
     buf[i] = 0;
     return i;
 }
 
-int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
+int zvsnprintf(char* buf, size_t size, const char* fmt, va_list args)
 {
+    va_list ap;
     const char* arg;
     size_t i = 0, len;
+    va_copy(ap, args);
     while (*fmt && i + 1 >= BUFSIZ) {
         if (*fmt == '%') {
             arg = zstrfmt(++fmt, &fmt, &len, &ap);
@@ -150,7 +155,8 @@ int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
         else buf[i++] = *fmt;
         ++fmt;
     }
-    
+
+    va_end(ap);
     buf[i] = 0;
     return i;
 }
@@ -175,10 +181,12 @@ int zsprintf(char* buf, const char* fmt, ...)
     return ret;
 }
 
-int zvdprintf(int fd, const char* fmt, va_list ap)
+int zvdprintf(int fd, const char* fmt, va_list args)
 {
+    va_list ap;
     const char* arg;
     size_t i = 0, len, ret = 0;
+    va_copy(ap, args);
     while (*fmt) {
         if (*fmt == '%') {
             arg = zstrfmt(++fmt, &fmt, &len, &ap);
@@ -202,6 +210,8 @@ int zvdprintf(int fd, const char* fmt, va_list ap)
             i = 0;
         }
     }
+    
+    va_end(ap);
     ret += zioflush(fd, i);
     return ret;
 }

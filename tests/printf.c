@@ -10,8 +10,8 @@ int main(void)
     zprintf("%zu\n", sizeof(n));
     zprintf("String: %s\nStack Ptr: %p\nHeap Ptr: %p\nsize_t: %zu\nint: %d\n",
             hey, (void*)&n, (void*)n, sizeof(n), *n);
-    zprintf("Heap Ptr: %p\n", n);
     zprintf("Stack Ptr: %p\n", &n);
+    zprintf("Heap Ptr: %p\n", n);
     zprintf("%d\n", *n);
     zprintf("%p\n", n);
     zprintf("'%s', '%s'\n", "", NULL);
