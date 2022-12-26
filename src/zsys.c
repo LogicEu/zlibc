@@ -51,7 +51,7 @@ int zclose(int fd)
     return zsyscall(SYS_close + SYS_BASE, fd);
 }
 
-int zwrite(int fd, const void* buf, size_t size)
+ssize_t zwrite(int fd, const void* buf, size_t size)
 {
     return zsyscall(SYS_write + SYS_BASE, fd, buf, size);
 }
@@ -68,6 +68,11 @@ int zfstat(int fd, struct stat *st)
 #else 
     return zsyscall(SYS_fstatfs + SYS_BASE, fd, st);
 #endif
+}
+
+off_t zlseek(int fd, off_t offset, int whence)
+{
+    return zsyscall(SYS_lseek + SYS_BASE, fd, offset, whence);
 }
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)

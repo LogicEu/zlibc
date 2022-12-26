@@ -4,52 +4,24 @@
 #include <zstring.h>
 #include <zstdio.h>
 
-static char stdio_buffer[BUFSIZ];
+#define zinttoa(buf, base, l, ap) (!l ? zitoa(va_arg(ap, int), buf, base) : zltoa(va_arg(ap, long int), buf, base))
+#define zuinttoa(buf, base, l, ap) (!l ? zutoa(va_arg(ap, unsigned int), buf, base) : zultoa(va_arg(ap, long unsigned int), buf, base))
 
-static int zsysprint(const char* str, int fd, int len)
-{
-    return zwrite(fd, str, len);
-}
+static char stdio_buffer[BUFSIZ];
 
 static size_t zioflush(int fd, size_t len)
 {
     stdio_buffer[len] = 0;
-    zsysprint(stdio_buffer, fd, len);
+    zwrite(fd, stdio_buffer, len);
     return len;
 }
-
-#define lli(buf, i, base, l, ap, type) do {                     \
-    switch(l) {                                                 \
-        case 0: {                                               \
-            i += zitoa(va_arg(ap, type), buf + i, base);        \
-            break;                                              \
-        }                                                       \
-        case 1: {                                               \
-            i += zltoa(va_arg(ap, long type), buf + i, base);   \
-            break;                                              \
-        }                                                       \
-    }                                                           \
-} while (0)
-
-#define llu(buf, i, base, l, ap, type) do {                     \
-    switch(l) {                                                 \
-        case 0:                                                 \
-            i += zutoa(va_arg(ap, type), buf + i, base);        \
-            break;                                              \
-        case 1:                                                 \
-            i += zultoa(va_arg(ap, long type), buf + i, base);  \
-            break;                                              \
-    }                                                           \
-} while (0)
 
 static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_list* ap)
 {
     static char buf[BUFSIZ];
     
-    size_t l, i = 0;
-    for (l = 0; *fmt == 'l' && l < 1; ++l) {
-        ++fmt;
-    }
+    size_t i = 0, l = (*fmt == 'l');
+    fmt += l;
     
     switch (*fmt) {
         case '%': {
@@ -73,22 +45,21 @@ static const char* zstrfmt(const char* fmt, const char** end, size_t* len, va_li
             return s;
         }
         case 'd': {
-            lli(buf, i, 10, l, *ap, int);
+            i += zinttoa(buf + i, 10, l, *ap);
             break;
         }
         case 'u': {
-            llu(buf, i, 10, l, *ap, unsigned int);
+            i += zuinttoa(buf + i, 10, l, *ap);
             break;
         }
-        case 'X':
-        case 'x': {
+        case 'X': case 'x': {
             buf[i++] = '0';
             buf[i++] = 'x';
-            lli(buf, i, 16, l, *ap, int);
+            i += zinttoa(buf + i, 16, l, *ap);
             break;
         }
         case 'b': {
-            lli(buf, i, 2, l, *ap, int);
+            i += zinttoa(buf + i, 2, l, *ap);
             break;
         }
         case 'f': {
@@ -194,7 +165,7 @@ int zvdprintf(int fd, const char* fmt, va_list args)
                 ret += zioflush(fd, i);
                 i = 0;
                 if (*fmt == 's') {
-                    zsysprint(arg, fd, len);
+                    zwrite(fd, arg, len);
                     ++fmt;
                     continue;
                 }
@@ -210,7 +181,7 @@ int zvdprintf(int fd, const char* fmt, va_list args)
             i = 0;
         }
     }
-    
+
     va_end(ap);
     ret += zioflush(fd, i);
     return ret;

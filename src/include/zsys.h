@@ -21,9 +21,10 @@ void zsysexit(int status) __attribute__((noreturn));
 
 int zopen(const char* fpath, int flag);
 int zclose(int fd);
-int zwrite(int fd, const void* buf, size_t size);
+ssize_t zwrite(int fd, const void* buf, size_t size);
 ssize_t zread(int fd, void* dst, size_t size);
 int zfstat(int fd, struct stat *st);
+off_t zlseek(int fd, off_t offset, int whence);
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset);
 int zmunmap(void* addr, size_t size);
