@@ -33,7 +33,7 @@ int zopen(__attribute__((unused)) const char* s, __attribute__((unused)) int f, 
 {
     __asm__ volatile (
 #ifdef __x86_64__
-        "\tmovq 0x2000005, %rax\n"
+        "\tmovq $0x2000005, %rax\n"
         "\tsyscall\n"
         "\tret\n"
 #elif __arm__
