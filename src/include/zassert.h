@@ -25,4 +25,5 @@ do {                            \
 #else
 #define zassert(expr) ((void)0)
 #endif /* NDEBUG */
+
 #endif /* Z_ASSERT */

@@ -4,28 +4,23 @@
 #include <sys/types.h>
 #include <zstddef.h>
 
-#ifndef BUFSIZ 
-#define BUFSIZ 1024
-#endif
-
-#ifndef Z_SEEK_SET
-#define	Z_SEEK_SET 0
-#endif
-
-#ifndef Z_SEEK_CUR
-#define	Z_SEEK_CUR 1
-#endif
-
-#ifndef Z_SEEK_END
-#define	Z_SEEK_END 2
-#endif
-
-#ifndef ZEOF
+#define ZBUFSIZ 1024
 #define ZEOF (-1)
+
+#ifndef BUFSIZ
+#define BUFSIZ ZBUFSIZ
+#endif
+
 #ifndef EOF
 #define EOF ZEOF
 #endif
-#endif
+
+#define	Z_SEEK_SET 0
+#define	Z_SEEK_CUR 1
+#define	Z_SEEK_END 2
+
+#define	Z_FOPEN_MAX 20
+#define	Z_FILENAME_MAX 1024
 
 typedef struct __zfile ZFILE;
 
@@ -61,5 +56,7 @@ ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd);
 ssize_t zgetline(char** linep, size_t* linecap, int fd);
 
 int zsscanf(const char* str, const char* fmt, ...);
+
+void zperror(const char* s);
 
 #endif /* Z_STDIO_H */
