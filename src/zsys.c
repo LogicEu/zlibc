@@ -29,21 +29,22 @@ long zsyscall(__attribute__((unused)) long op, ...)
     );
 }
 
-static void zsysnoret(int status) __attribute__((noreturn));
-static void zsysnoret(int status)
+int zopen(__attribute__((unused)) const char* s, __attribute__((unused)) int f, ...)
 {
-    zsysexit(status);
-}
-
-void zsysexit(int status)
-{
-    zsyscall(SYS_exit + SYS_BASE, status);
-    zsysnoret(status);
-}
-
-int zopen(const char* fpath, int flag)
-{
-    return zsyscall(SYS_open + SYS_BASE, fpath, flag);
+    __asm__ volatile (
+#ifdef __x86_64__
+        "\tmovq 0x2000005, %rax\n"
+        "\tsyscall\n"
+        "\tret\n"
+#elif __arm__
+        "\tmov ip, sp\n"
+        "\tpush {r4, r5, r6, r7}\n"
+        "\tmov r7, #5\n"
+        "\tsvc #0\n"
+        "\tpop {r4, r5, r6, r7}\n"
+        "\tbx lr\n"
+#endif
+    );
 }
 
 int zclose(int fd)
@@ -63,10 +64,10 @@ ssize_t zread(int fd, void* dst, size_t size)
 
 int zfstat(int fd, struct stat *st)
 {
-#if defined __x86_64__ && defined __APPLE__
+#if defined __x86_64__
     return zsyscall(SYS_fstat64 + SYS_BASE, fd, st);
 #else 
-    return zsyscall(SYS_fstatfs + SYS_BASE, fd, st);
+    return fstat(fd, st);
 #endif
 }
 
@@ -77,16 +78,24 @@ off_t zlseek(int fd, off_t offset, int whence)
 
 void* zmmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
-#if defined __x86_64__ && defined __APPLE__
+#if defined __APPLE__
     return (void*)zsyscall(SYS_mmap + SYS_BASE, addr, size, prot, flags, fd, offset);
 #else 
     return (void*)zsyscall(SYS_mmap2 + SYS_BASE, addr, size, prot, flags, fd, offset);
 #endif
-    /* return mmap(addr, size, prot, flags, fd, offset); */
 }
 
 int zmunmap(void* addr, size_t size)
 {
     return zsyscall(SYS_munmap + SYS_BASE, addr, size);
-    /* return munmap(addr, size); */
 }
+
+static void zsysnoret(int status) __attribute__((noreturn));
+static void zsysnoret(int status) { zsysexit(status); }
+
+void zsysexit(int status)
+{
+    zsyscall(SYS_exit + SYS_BASE, status);
+    zsysnoret(status);
+}
+

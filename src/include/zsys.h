@@ -19,7 +19,8 @@ __attribute__((naked))
 long zsyscall(long op, ...);
 void zsysexit(int status) __attribute__((noreturn));
 
-int zopen(const char* fpath, int flag);
+__attribute__((naked)) 
+int zopen(const char* fpath, int flag, ...);
 int zclose(int fd);
 ssize_t zwrite(int fd, const void* buf, size_t size);
 ssize_t zread(int fd, void* dst, size_t size);

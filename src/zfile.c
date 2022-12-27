@@ -7,7 +7,7 @@ extern void zfree(void*);
 typedef struct __zfile ZFILE;
 
 struct __zfile {
-    int mode;
+    int flags;
     int fileno;
     off_t offset;
     size_t size;
@@ -23,25 +23,29 @@ ZFILE* __zstderrp = &__zstderr;
 
 ZFILE* zfopen(const char* path, const char* modefmt)
 {
-    int fileno, mode;
+    int fileno, flags;
     struct stat st;
     struct __zfile* file;
 
     switch (modefmt[0]) {
         case 'r':
-            mode = modefmt[1] == '+' ? O_RDWR : O_RDONLY;
+            flags = modefmt[1] == '+' ? O_RDWR : O_RDONLY;
             break;
         case 'w':
-            mode = modefmt[1] == '+' ? O_RDWR | O_CREAT | O_TRUNC : O_WRONLY | O_CREAT | O_TRUNC;
+            flags =  modefmt[1] == '+' ?
+                    O_RDWR | O_CREAT | O_TRUNC :
+                    O_WRONLY | O_CREAT | O_TRUNC;
             break;
         case 'a':
-            mode = modefmt[1] == '+' ? O_RDWR | O_APPEND | O_CREAT : O_WRONLY | O_APPEND | O_CREAT;
+            flags =  modefmt[1] == '+' ?
+                    O_RDWR | O_APPEND | O_CREAT :
+                    O_WRONLY | O_APPEND | O_CREAT;
             break;
         default:
             return NULL;
     }
 
-    fileno = zopen(path, mode);
+    fileno = zopen(path, flags, 0666);
     if (fileno < 0 || zfstat(fileno, &st) < 0) {
         return NULL;
     }
@@ -51,7 +55,7 @@ ZFILE* zfopen(const char* path, const char* modefmt)
         return NULL;
     }
 
-    file->mode = mode;
+    file->flags = flags;
     file->fileno = fileno;
     file->size = modefmt[0] == 'w' ? 0 : (size_t)st.st_size;
     file->offset = modefmt[0] == 'a' ? (off_t)st.st_size : 0;
@@ -79,7 +83,7 @@ int zfseek(ZFILE* stream, long offset, int whence)
 
 void zrewind(ZFILE* stream)
 {
-    off_t off = zlseek(stream->fileno, 0L, SEEK_SET);
+    off_t off = zlseek(stream->fileno, 0, 0);
     if (off != -1) {
         stream->offset = off;
     }

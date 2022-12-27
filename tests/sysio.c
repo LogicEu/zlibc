@@ -23,9 +23,9 @@ int main(const int argc, const char** argv)
         zwrite(STDERR_FILENO, &nl, 1); 
         return -1;
     }
-    
+   
     zfstat(fd, &st);
-    size = (size_t)st.st_size; 
+    size = (size_t)st.st_size;
     for (i = 0; i < size; ++i) {
         zread(fd, &c, 1);
         zwrite(STDOUT_FILENO, &c, 1); 
