@@ -21,4 +21,6 @@
     #endif
 #endif /* NULL */
 
+#define offsetof(s, m) ((size_t)&(((s*)0)->m))
+
 #endif /* Z_STDDEF_H */
