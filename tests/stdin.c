@@ -1,7 +1,6 @@
 #include <zstdio.h>
 #include <zstdlib.h>
 #include <zstring.h>
-#include <zsys.h>
 
 static void zinout(const char* str)
 {
@@ -11,7 +10,7 @@ static void zinout(const char* str)
    
     while (1) {
         zprintf("%s", str);
-        linelen = zgetline(&line, &linecap, SYS_STDIN);
+        linelen = zgetline(&line, &linecap, zstdin);
         line[--linelen] = 0;
         if (!zstrcmp(line, "exit")) {
             break;

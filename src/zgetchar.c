@@ -1,13 +1,15 @@
-#include <zsys.h>
+#include <zstdio.h>
 
-int zgetc(int fd)
+int zgetc(ZFILE* stream)
 {
-    int c = 0;
-    int err = zread(fd, &c, 1);
-    return err == -1 ? err : c;
+    int c;
+    size_t err = zfread(&c, sizeof(char), 1, stream);
+    return !err ? ZEOF : c;
 }
 
 int zgetchar(void)
-{
-    return zgetc(STDIN_FILENO);
+{ 
+    int c;
+    size_t err = zfread(&c, sizeof(char), 1, zstdin);
+    return !err ? ZEOF : c;
 }

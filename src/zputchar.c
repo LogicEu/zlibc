@@ -1,13 +1,23 @@
-#include <zsys.h>
+#include <zstdio.h>
 
-int zputc(int c, int fd)
+int zfputc(int c, ZFILE* stream)
 {
-    char ch = (char)c;
-    int err = zwrite(fd, &ch, 1);
-    return err == -1 ? err : c;
+    unsigned char ch =  (unsigned char)c;
+    size_t err = zfwrite(&ch, sizeof(unsigned char), 1, stream);
+    return !err ? ZEOF : c;
+}
+
+int zputc(int c, ZFILE* stream)
+{
+    unsigned char ch = (unsigned char)c;
+    size_t err = zfwrite(&ch, sizeof(unsigned char), 1, stream);
+    return !err ? ZEOF : c;
 }
 
 int zputchar(int c)
-{
-    return zputc(c, STDOUT_FILENO);
+{ 
+    unsigned char ch = (unsigned char)c;
+    size_t err = zfwrite(&ch, sizeof(unsigned char), 1, zstdout);
+    return !err ? ZEOF : c;
 }
+

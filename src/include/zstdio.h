@@ -22,7 +22,10 @@
 #define	Z_FOPEN_MAX 20
 #define	Z_FILENAME_MAX 1024
 
+#ifndef ZFILE_DEFINED
+#define ZFILE_DEFINED
 typedef struct __zfile ZFILE;
+#endif
 
 extern ZFILE* __zstdinp;
 extern ZFILE* __zstdoutp;
@@ -44,16 +47,24 @@ size_t zfwrite(const void* ptr, size_t size, size_t count, ZFILE* stream);
 int zsnprintf(char* buf, size_t size, const char* fmt, ...);
 int zsprintf(char* buf, const char* fmt, ...);
 int zdprintf(int fd, const char* fmt, ...);
+int zfprintf(ZFILE* stream, const char* fmt, ...);
 int zprintf(const char* fmt, ...);
 
-int zputc(int c, int fd);
+int zputc(int c, ZFILE* stream);
+int zfputc(int c, ZFILE* stream);
 int zputchar(int c);
 
-int zgetc(int fd);
+int zfputs(const char* str, ZFILE* stream);
+int zputs(const char* str);
+
+int zgetc(ZFILE* stream);
 int zgetchar(void);
 
-ssize_t zgetdelim(char** linep, size_t* linecap, int delim, int fd);
-ssize_t zgetline(char** linep, size_t* linecap, int fd);
+char* zfgets(char* str, int size, ZFILE* stream);
+char* zgets(char* str);
+
+ssize_t zgetdelim(char** linep, size_t* linecap, int delim, ZFILE* stream);
+ssize_t zgetline(char** linep, size_t* linecap, ZFILE* stream);
 
 int zsscanf(const char* str, const char* fmt, ...);
 

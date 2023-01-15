@@ -3,7 +3,13 @@
 
 #include <zstddef.h>
 
+#ifndef ZFILE_DEFINED
+#define ZFILE_DEFINED
+typedef struct __zfile ZFILE;
+#endif
+
 typedef __builtin_va_list va_list;
+
 #define va_arg(ap, type) __builtin_va_arg(ap, type)
 #define va_start(ap, param) __builtin_va_start(ap, param)
 #define va_end(ap) __builtin_va_end(ap)
@@ -12,6 +18,7 @@ typedef __builtin_va_list va_list;
 int zvsnprintf(char* buf, size_t size, const char* fmt, va_list ap);
 int zvsprintf(char* buf, const char* fmt, va_list ap);
 int zvdprintf(int fd, const char* fmt, va_list ap);
+int zvfprintf(ZFILE* stream, const char* fmt, va_list ap);
 int zvprintf(const char* str, va_list ap);
 
 int zvsscanf(const char* str, const char* fmt, va_list ap);

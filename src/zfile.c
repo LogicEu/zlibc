@@ -1,10 +1,9 @@
 #include <zsys.h>
 #include <zstddef.h>
 
-extern void* zmalloc(size_t);
-extern void zfree(void*);
-
-typedef struct __zfile ZFILE;
+#ifndef Z_FOPEN_MAX
+#define Z_FOPEN_MAX 20
+#endif
 
 struct __zfile {
     int flags;
@@ -13,9 +12,13 @@ struct __zfile {
     size_t size;
 };
 
-static struct __zfile __zstdin = {O_RDONLY, STDIN_FILENO, 0, 0};
-static struct __zfile __zstdout = {O_WRONLY, STDOUT_FILENO, 0, 0};
-static struct __zfile __zstderr = {O_WRONLY, STDERR_FILENO, 0, 0};
+typedef struct __zfile ZFILE;
+
+static unsigned int __zopened_files = 0;
+static ZFILE __zfile_buffer[Z_FOPEN_MAX];
+static ZFILE __zstdin = {O_RDONLY, STDIN_FILENO, 0, 0};
+static ZFILE __zstdout = {O_WRONLY, STDOUT_FILENO, 0, 0};
+static ZFILE __zstderr = {O_WRONLY, STDERR_FILENO, 0, 0};
 
 ZFILE* __zstdinp = &__zstdin;
 ZFILE* __zstdoutp = &__zstdout;
@@ -23,9 +26,13 @@ ZFILE* __zstderrp = &__zstderr;
 
 ZFILE* zfopen(const char* path, const char* modefmt)
 {
+    ZFILE* file;
     int fileno, flags;
     struct stat st;
-    struct __zfile* file;
+
+    if (__zopened_files + 1 == Z_FOPEN_MAX) {
+        return NULL;
+    }
 
     switch (modefmt[0]) {
         case 'r':
@@ -50,23 +57,26 @@ ZFILE* zfopen(const char* path, const char* modefmt)
         return NULL;
     }
     
-    file = zmalloc(sizeof(struct __zfile));
-    if (!file) {
-        return NULL;
-    }
-
+    file = __zfile_buffer + __zopened_files++;
     file->flags = flags;
     file->fileno = fileno;
     file->size = modefmt[0] == 'w' ? 0 : (size_t)st.st_size;
     file->offset = modefmt[0] == 'a' ? (off_t)st.st_size : 0;
-
     return file;
 }
 
 int zfclose(ZFILE* stream)
 {
     int fileno = stream->fileno;
-    zfree(stream);
+    if (fileno < 3 || !__zopened_files) {
+        return -1;
+    }
+
+    stream->fileno = -1;
+    stream->flags = 0;
+    stream->size = 0;
+    stream->offset = 0;
+    --__zopened_files;
     return zclose(fileno);
 }
 
@@ -122,3 +132,4 @@ size_t zfwrite(const void* ptr, size_t size, size_t count, ZFILE* stream)
     stream->size += offset;
     return (size_t)offset;
 }
+

@@ -202,6 +202,21 @@ int zvprintf(const char* fmt, va_list ap)
     return zvdprintf(STDOUT_FILENO, fmt, ap);
 }
 
+int zvfprintf(ZFILE* stream, const char* fmt, va_list ap)
+{
+    return zvdprintf(zfileno(stream), fmt, ap);
+}
+
+int zfprintf(ZFILE* stream, const char* fmt, ...)
+{
+    int ret;
+    va_list ap;
+    va_start(ap, fmt);
+    ret = zvdprintf(zfileno(stream), fmt, ap);
+    va_end(ap);
+    return ret;
+}
+
 int zprintf(const char* fmt, ...)
 {
     int ret;
