@@ -6,7 +6,7 @@ char* zfgets(char* str, int size, ZFILE* stream)
     char* c = str;
     --size;
     for (i = 0; i < size; ++i) {
-        if (!zfread(c, sizeof(char), 1, stream) || *c == ZEOF) {
+        if (!zfread(c, sizeof(char), 1, stream) || *c == (char)ZEOF) {
             return NULL;    
         }
 
@@ -25,7 +25,7 @@ char* zgets(char* str)
 {
     char* c = str;
     while (1) {
-        if (!zfread(c, sizeof(char), 1, zstdin) || *c == ZEOF) {
+        if (!zfread(c, sizeof(char), 1, zstdin) || *c == (char)ZEOF) {
             return NULL;
         }
 
