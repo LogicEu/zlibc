@@ -7,23 +7,28 @@
 #ifndef NDEBUG
 
 __attribute__((unused))
-static const char* zassertmsg = "Assertion failed: %s, file %s, function %s, Line %zu.\n";
+static const char* zassertmsg = "Assertion failed: %s, file %s,"
+#ifdef __STDC_VERSION__
+                                "function %s,"
+#endif
+                                "line %zu.\n";
 
-#define zassert(expr)           \
-do {                            \
-    if (!(expr)) {              \
-        zprintf(                \
-            zassertmsg,         \
-            #expr,              \
-            __FILE__,           \
-            __func__,           \
-            __LINE__            \
-        );                      \
-        zabort();               \
-    }                           \
-} while (0)
+#ifdef __STDC_VERSION__
+#define Z_ASSERT_ARGS __FILE__, __func__, __LINE__
 #else
+#define Z_ASSERT_ARGS __FILE__, __LINE__
+#endif
+
+#define zassert(expr)                               \
+do {                                                \
+    if (!(expr)) {                                  \
+        zprintf(zassertmsg, #expr, Z_ASSERT_ARGS);  \
+        zabort();                                   \
+    }                                               \
+} while (0)
+
+#else /* NDEBUG */
 #define zassert(expr) ((void)0)
 #endif /* NDEBUG */
-
 #endif /* Z_ASSERT */
+

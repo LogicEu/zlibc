@@ -1,21 +1,15 @@
 extern int main();
-extern void zexit(int status);
-extern int zprintf(const char* fmt, ...);
+extern void zexit(int);
 
 void start(int argc, char** argv, char** envp)
 {
+    int ret;
 #ifdef __arm__
-    int i;
-    
-    (void)argc;
-    (void)argv;
-
-    for (i = 0; envp[i]; ++i);
-    zexit(main(i, envp, envp + i + 1));
-
-#else
-
-    zexit(main(argc, argv, envp));
-
+    argc = (int)argv;
+    argv = envp;
+    envp = argv + argc + 1;
 #endif
+    ret = main(argc, argv, envp);
+    zexit(ret);
 }
+
