@@ -13,7 +13,6 @@ int zatexit(void (*func)(void));
 void* zmalloc(size_t size);
 void* zrealloc(void* ptr, size_t len);
 void* zcalloc(size_t count, size_t size);
-void* zfmalloc(int fd, size_t size);
 void zfree(void* ptr);
 void zffree(void* fptr);
 

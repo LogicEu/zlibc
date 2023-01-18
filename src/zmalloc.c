@@ -11,12 +11,6 @@ extern int zprintf(const char* fmt, ...);
 #define PAGESIZE 4096
 #endif
 
-#if !defined __arm__
-#define MEMHINT_FILE (void*)0x600020000000UL
-#else
-#define MEMHINT_FILE (void*)0x1000000UL
-#endif
-
 #define MEMCHECK_OWND 0x77777777UL
 #define MEMCHECK_FREE 0xfedcba01UL
 
@@ -69,8 +63,6 @@ static void* memfree(void)
     head = NULL;
     membase = NULL;
     membytes = 0;
-    
-    zprintf("successfully cleaned all memmory.\n");
     return NULL;
 }
 
@@ -307,38 +299,6 @@ void* zcalloc(size_t count, size_t size)
         zmemset(mem, 0, n);
     }
     return mem;
-}
-
-void* zfmalloc(int fd, size_t size)
-{
-    void* mem, *ret;
-    size_t alloc_size = PAGESIZE;
-    
-    if (!size) {
-        return NULL;
-    }
-
-    while (size > alloc_size) {
-        alloc_size *= 2;
-    }
-    
-    mem = zmmap(MEMHINT_FILE, alloc_size, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
-    if (!mem || mem == MAP_FAILED) {
-        zprintf("fmalloc failed to allocate %zub of memory.\n", alloc_size);
-        return NULL;
-    }
-
-    ret = zmalloc(size);
-    if (ret) {
-        zmemcpy(ret, mem, size);
-    }
-
-    if (zmunmap(mem, alloc_size)) {
-        zprintf("munmap error freeing %zub of memory.\n", alloc_size);
-        zabort();
-    }
-
-    return ret;
 }
 
 #ifndef NDEBUG
