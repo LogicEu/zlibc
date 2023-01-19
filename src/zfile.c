@@ -24,6 +24,8 @@ ZFILE* __zstdinp = &__zstdin;
 ZFILE* __zstdoutp = &__zstdout;
 ZFILE* __zstderrp = &__zstderr;
 
+extern int zprintf(const char*, ...);
+
 ZFILE* zfopen(const char* path, const char* modefmt)
 {
     ZFILE* file;
@@ -53,7 +55,7 @@ ZFILE* zfopen(const char* path, const char* modefmt)
     }
 
     fileno = zopen(path, flags, 0666);
-    if (fileno < 0 || zfstat(fileno, &st) < 0) {
+    if (fileno <= STDERR_FILENO || zfstat(fileno, &st) < 0) {
         return NULL;
     }
     
@@ -68,7 +70,7 @@ ZFILE* zfopen(const char* path, const char* modefmt)
 int zfclose(ZFILE* stream)
 {
     int fileno = stream->fileno;
-    if (fileno < 3 || !__zopened_files) {
+    if (fileno <= STDERR_FILENO || !__zopened_files) {
         return -1;
     }
 
