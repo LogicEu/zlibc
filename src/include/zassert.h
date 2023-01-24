@@ -9,9 +9,9 @@
 __attribute__((unused))
 static const char* zassertmsg = "Assertion failed: %s, file %s,"
 #ifdef __STDC_VERSION__
-                                "function %s,"
+                                " function %s,"
 #endif
-                                "line %zu.\n";
+                                " line %zu.\n";
 
 #ifdef __STDC_VERSION__
 #define Z_ASSERT_ARGS __FILE__, __func__, __LINE__
