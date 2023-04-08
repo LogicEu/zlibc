@@ -20,11 +20,14 @@ char* zstrcpy(char* dst, const char* src);
 char* zstrcat(char* dst, const char* src);
 int zstrcmp(const char* s1, const char* s2);
 size_t zstrlen(const char* str);
+size_t zstrspn(const char* str, const char* charset);
+size_t zstrcspn(const char* str, const char* charset);
 char* zstrchr(const char* str, const int c);
 char* zstrstr(const char* big, const char* small);
 char* zstrdup(const char* str);
 char* zstrndup(const char* str, size_t len);
-char* zstrtok(char* str, const char* div);
+char* zstrsep(char** strptr, const char* delim);
+char* zstrtok(char* str, const char* delim);
 char* zstrerror(int errnum);
 
 #endif /* Z_STRING_H */

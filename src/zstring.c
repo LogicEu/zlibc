@@ -90,6 +90,36 @@ size_t zstrlen(const char* str)
     return i;
 }
 
+size_t zstrcspn(const char* str, const char* charset)
+{
+    size_t i, j;
+    for (i = 0; str[i]; ++i) {
+        for (j = 0; charset[j]; ++j) {
+            if (str[i] == charset[j]) {
+                return i;
+            }
+        }
+    }
+    return i;
+}
+
+size_t zstrspn(const char* str, const char* charset)
+{
+    size_t i, j;
+    for (i = 0; str[i]; ++i) {
+        for (j = 0; charset[j]; ++j) {
+            if (str[i] == charset[j]) {
+                break;
+            }
+        }
+
+        if (!charset[j]) {
+            break;
+        }
+    }
+    return i;
+}
+
 char* zstrchr(const char* str, const int c)
 {
     while (*str) {
@@ -109,6 +139,24 @@ char* zstrstr(const char* big, const char* small)
             return (char*)(size_t)big;
         }
         ++big;
+    }
+    return NULL;
+}
+
+char* zstrsep(char** strptr, const char* delim)
+{
+    char* str = *strptr;
+    if (str) {
+        size_t i, j;
+        for (i = 0; str[i]; ++i) {
+            for (j = 0; delim[j]; ++j) {
+                if (str[i] == delim[j]) {
+                    str[i] = '\0';
+                    *strptr = str + i + 1;
+                    return str;
+                }
+            }
+        }
     }
     return NULL;
 }
