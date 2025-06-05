@@ -68,8 +68,8 @@ $(TMPDIR):
 $(BINDIR):
 	mkdir -p $@
 
-clean: $(SCRIPT)
-	./$^ $@
+clean:
+	$(RM) -r $(TMPDIR) $(BINDIR)
 
 install: $(SCRIPT)
 	./$^ $@
